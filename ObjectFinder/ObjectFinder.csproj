@@ -58,4 +58,8 @@
 			<Private>false</Private>
 		</Reference>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Events\" />
+	</ItemGroup>
 </Project>

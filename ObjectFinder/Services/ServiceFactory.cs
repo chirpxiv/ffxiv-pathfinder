@@ -4,9 +4,11 @@ using Dalamud.Plugin;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using ObjectFinder.Services.Core;
+
 namespace ObjectFinder.Services; 
 
-public class ServiceFactory {
+public class ServiceFactory : IDisposable {
 	// Services state
 	
 	private readonly ServiceCollection Services = new();
@@ -21,6 +23,20 @@ public class ServiceFactory {
 	public ServiceProvider CreateProvider()
 		=> this.Services.BuildServiceProvider(ProviderOptions);
 	
+	// Resolver
+
+	private ServiceResolver<ServiceAttribute>? Resolver;
+	
+	private ServiceResolver<ServiceAttribute> GetResolver()
+		=> this.Resolver ??= new ServiceResolver<ServiceAttribute>(this.Services);
+
+	private ServiceResolver<ServiceAttribute> ConsumeResolver() {
+		var inst = GetResolver();
+		if (inst == null) throw new Exception("Invalid resolver state.");
+		this.Resolver = null;
+		return inst;
+	}
+	
 	// Factory methods
 
 	public ServiceFactory AddDalamud(DalamudPluginInterface api) {
@@ -29,9 +45,23 @@ public class ServiceFactory {
 		return this;
 	}
 
-	public ServiceFactory AddResolveType<A>() where A : Attribute {
-		var resolver = new ServiceResolver<A>();
-		resolver.GetTypes().ForEach(type => this.Services.AddSingleton(type));
+	public ServiceFactory ResolveAll() {
+		this.GetResolver()
+			.AddSingletons<GlobalServiceAttribute>()
+			.AddSingletons<ServiceEventAttribute>()
+			.AddScoped<ServiceStateAttribute>();
 		return this;
 	}
+
+	public void Initialize(ServiceProvider provider) {
+		var services = ConsumeResolver()
+			.GetServices<GlobalServiceAttribute>();
+
+		foreach (var service in services)
+			provider.GetRequiredService(service.ServiceType);
+	}
+	
+	// Disposal
+
+	public void Dispose() => this.Resolver = null;
 }

@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 
 using Dalamud.Logging;
 using Dalamud.Plugin;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using ObjectFinder.Interface;
 using ObjectFinder.Services;
-using ObjectFinder.Services.Attributes;
 
 namespace ObjectFinder;
 
@@ -24,18 +23,20 @@ public sealed class ObjectFinder : IDalamudPlugin {
 	
 	public ObjectFinder(DalamudPluginInterface api) {
 		try {
-			this._services = new ServiceFactory()
+			using var factory = new ServiceFactory();
+			
+			this._services = factory
 				.AddDalamud(api)
-				.AddResolveType<GlobalServiceAttribute>()
+				.ResolveAll()
 				.CreateProvider();
-
-			this._services.GetRequiredService<PluginGui>();
+				
+			factory.Initialize(this._services);
 		} catch (Exception err) {
 			PluginLog.Error($"Failed to initialize plugin:\n{err}");
 			this.Dispose();
 			throw;
 		}
 	}
-
+	
 	public void Dispose() => this._services.Dispose();
 }
