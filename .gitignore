@@ -1,0 +1,30 @@
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+
+# Visual Studio
+.vs/
+
+# Fleet
+.fleet/
+
+# Code Rush
+.cr/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+[Bb]in/
+[Oo]bj/
