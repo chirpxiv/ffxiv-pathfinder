@@ -4,7 +4,9 @@ using Dalamud.Plugin;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using ObjectFinder.Services.Core;
+using ObjectFinder.Events;
+using ObjectFinder.Events.Impl;
+using ObjectFinder.Services.Attributes;
 
 namespace ObjectFinder.Services; 
 
@@ -59,6 +61,11 @@ public class ServiceFactory : IDisposable {
 
 		foreach (var service in services)
 			provider.GetRequiredService(service.ServiceType);
+	}
+
+	public void Initialize<E>(ServiceProvider provider) where E : IEvent {
+		Initialize(provider);
+		provider.GetRequiredService<E>().Invoke();
 	}
 	
 	// Disposal

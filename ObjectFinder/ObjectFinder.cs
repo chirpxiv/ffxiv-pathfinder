@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 
 using Dalamud.Logging;
 using Dalamud.Plugin;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using ObjectFinder.Events;
 using ObjectFinder.Services;
 
 namespace ObjectFinder;
@@ -30,7 +30,7 @@ public sealed class ObjectFinder : IDalamudPlugin {
 				.ResolveAll()
 				.CreateProvider();
 				
-			factory.Initialize(this._services);
+			factory.Initialize<InitEvent>(this._services);
 		} catch (Exception err) {
 			PluginLog.Error($"Failed to initialize plugin:\n{err}");
 			this.Dispose();

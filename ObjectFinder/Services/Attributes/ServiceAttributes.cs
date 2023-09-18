@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ObjectFinder.Services.Core;
+namespace ObjectFinder.Services.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 public abstract class ServiceAttribute : Attribute { }
