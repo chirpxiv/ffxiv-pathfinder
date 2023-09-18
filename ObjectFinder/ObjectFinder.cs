@@ -6,7 +6,7 @@ using Dalamud.Plugin;
 using Microsoft.Extensions.DependencyInjection;
 
 using ObjectFinder.Events;
-using ObjectFinder.Services;
+using ObjectFinder.Services.Core;
 
 namespace ObjectFinder;
 
@@ -30,13 +30,22 @@ public sealed class ObjectFinder : IDalamudPlugin {
 				.ResolveAll()
 				.CreateProvider();
 				
-			factory.Initialize<InitEvent>(this._services);
-		} catch (Exception err) {
-			PluginLog.Error($"Failed to initialize plugin:\n{err}");
-			this.Dispose();
+			factory.Initialize(this._services);
+
+			using var _initEvent = this._services.GetRequiredService<InitEvent>();
+			_initEvent.Invoke();
+
+		} catch {
+			Dispose();
 			throw;
 		}
 	}
-	
-	public void Dispose() => this._services.Dispose();
+
+	public void Dispose() {
+		try {
+			this._services.Dispose();
+		} catch (Exception err) {
+			PluginLog.Error($"Failed to dispose:\n{err}");
+		}
+	}
 }

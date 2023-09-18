@@ -7,7 +7,7 @@ using Dalamud.Logging;
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ObjectFinder.Services;
+namespace ObjectFinder.Services.Core;
 
 public class ServiceResolver<A> where A : Attribute {
 	// Constructor
@@ -31,7 +31,6 @@ public class ServiceResolver<A> where A : Attribute {
 		try {
 			var types = Assembly.GetExecutingAssembly()
 				.GetTypes()
-				.AsParallel()
 				.Where(TypeHasBaseAttribute);
 			this.Types.AddRange(types);
 		} catch (Exception err) {
@@ -44,18 +43,20 @@ public class ServiceResolver<A> where A : Attribute {
 	
 	// Factory methods
 	
-	private List<Type> GetByAttribute<B>() where B : A {
+	private IEnumerable<Type> GetByAttribute<B>() where B : A {
 		GetTypes();
-		return this.Types.Where(TypeHasAttribute<B>).ToList();
+		return this.Types.Where(TypeHasAttribute<B>);
 	}
 
 	public ServiceResolver<A> AddSingletons<B>() where B : A {
-		GetByAttribute<B>().ForEach(type => this._services.AddSingleton(type));
+		foreach (var type in GetByAttribute<B>())
+			this._services.AddSingleton(type);
 		return this;
 	}
 
 	public ServiceResolver<A> AddScoped<B>() where B : A {
-		GetByAttribute<B>().ForEach(type => this._services.AddScoped(type));
+		foreach (var type in GetByAttribute<B>())
+			this._services.AddScoped(type);
 		return this;
 	}
 	

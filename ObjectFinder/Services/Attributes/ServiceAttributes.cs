@@ -9,4 +9,4 @@ public class GlobalServiceAttribute : ServiceAttribute { }
 
 public class ServiceEventAttribute : ServiceAttribute { }
 
-public class ServiceStateAttribute : ServiceAttribute { }
+public class LocalServiceAttribute : ServiceAttribute { }

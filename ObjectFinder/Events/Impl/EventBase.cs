@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ObjectFinder.Events.Impl;
 
-public abstract class EventBase<D> : IEvent<D> where D : Delegate {
+public abstract class EventBase<D> : IDisposable, IEvent<D> where D : Delegate {
 	private readonly HashSet<object> _subscribers = new();
 
 	// Subscribers
@@ -12,9 +12,8 @@ public abstract class EventBase<D> : IEvent<D> where D : Delegate {
 		this._subscribers.Add(handler);
 		return new EventClient<D>(this, handler);
 	}
-	
-	public void Unsubscribe(D handler)
-		=> this._subscribers.Remove(handler);
+
+	public void Unsubscribe(D handler) => this._subscribers.Remove(handler);
 	
 	// Invocation
 	
@@ -32,4 +31,8 @@ public abstract class EventBase<D> : IEvent<D> where D : Delegate {
 		foreach (var _event in this._subscribers)
 			((Action<T1, T2>)_event).Invoke(_sender, _args);
 	}
+	
+	// Disposal
+	
+	public void Dispose() => this._subscribers.Clear();
 }

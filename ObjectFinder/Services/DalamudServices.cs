@@ -8,6 +8,7 @@ namespace ObjectFinder.Services;
 
 internal sealed class DalamudServices {
 	private readonly DalamudPluginInterface _api;
+	[PluginService] private ICommandManager _cmd { get; set; } = null!;
 	[PluginService] private IGameGui _gui { get; set; } = null!;
 
 	internal DalamudServices(DalamudPluginInterface api) {
@@ -15,8 +16,9 @@ internal sealed class DalamudServices {
 		api.Inject(this);
 	}
 
-	internal void AddServices(ServiceCollection services)
-			=> services.AddSingleton(this._api)
-				.AddSingleton(this._api.UiBuilder)
-				.AddSingleton(this._gui);
+	internal void AddServices(ServiceCollection services) => services
+		.AddSingleton(this._api)
+        .AddSingleton(this._api.UiBuilder)
+        .AddSingleton(this._cmd)
+        .AddSingleton(this._gui);
 }

@@ -4,11 +4,10 @@ using Dalamud.Plugin;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using ObjectFinder.Events;
 using ObjectFinder.Events.Impl;
 using ObjectFinder.Services.Attributes;
 
-namespace ObjectFinder.Services; 
+namespace ObjectFinder.Services.Core; 
 
 public class ServiceFactory : IDisposable {
 	// Services state
@@ -51,7 +50,7 @@ public class ServiceFactory : IDisposable {
 		this.GetResolver()
 			.AddSingletons<GlobalServiceAttribute>()
 			.AddSingletons<ServiceEventAttribute>()
-			.AddScoped<ServiceStateAttribute>();
+			.AddScoped<LocalServiceAttribute>();
 		return this;
 	}
 
@@ -61,11 +60,6 @@ public class ServiceFactory : IDisposable {
 
 		foreach (var service in services)
 			provider.GetRequiredService(service.ServiceType);
-	}
-
-	public void Initialize<E>(ServiceProvider provider) where E : IEvent {
-		Initialize(provider);
-		provider.GetRequiredService<E>().Invoke();
 	}
 	
 	// Disposal
