@@ -1,4 +1,6 @@
-﻿using Dalamud.Plugin;
+﻿using System;
+
+using Dalamud.Plugin;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,7 +24,14 @@ public class ServiceFactory {
 	// Factory methods
 
 	public ServiceFactory AddDalamud(DalamudPluginInterface api) {
-		new DalamudServices(api).AddServices(this.Services);
+		var container = new DalamudServices(api);
+		container.AddServices(this.Services);
+		return this;
+	}
+
+	public ServiceFactory AddResolveType<A>() where A : Attribute {
+		var resolver = new ServiceResolver<A>();
+		resolver.GetTypes().ForEach(type => this.Services.AddSingleton(type));
 		return this;
 	}
 }

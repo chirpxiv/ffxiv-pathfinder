@@ -5,7 +5,9 @@ using Dalamud.Plugin;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using ObjectFinder.Interface;
 using ObjectFinder.Services;
+using ObjectFinder.Services.Attributes;
 
 namespace ObjectFinder;
 
@@ -24,7 +26,10 @@ public sealed class ObjectFinder : IDalamudPlugin {
 		try {
 			this._services = new ServiceFactory()
 				.AddDalamud(api)
+				.AddResolveType<GlobalServiceAttribute>()
 				.CreateProvider();
+
+			this._services.GetRequiredService<PluginGui>();
 		} catch (Exception err) {
 			PluginLog.Error($"Failed to initialize plugin:\n{err}");
 			this.Dispose();
