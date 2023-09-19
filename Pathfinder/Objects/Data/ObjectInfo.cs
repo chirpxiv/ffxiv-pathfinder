@@ -6,27 +6,11 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Object = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.Object;
 using ModelType = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase.ModelType;
 
+using Pathfinder.Config.Data;
 using Pathfinder.Interop.Structs;
 using Pathfinder.Interop.Unmanaged;
 
 namespace Pathfinder.Objects.Data;
-
-[Flags]
-public enum ObjectFilterFlags {
-	None = 0,
-	
-	BgObject = 1,
-	Terrain = 2,
-	Chara = 4,
-	__Vfx = 8, // Reserved
-	
-	Human = Chara | 16,
-	DemiHuman = Chara | 32,
-	Monster = Chara | 64,
-	Weapon = Chara | 128,
-	
-	All = 255
-}
 
 public class ObjectInfo {
     public nint Address;
@@ -67,8 +51,8 @@ public class ObjectInfo {
 					ModelType.DemiHuman => ObjectFilterFlags.DemiHuman,
 					ModelType.Monster => ObjectFilterFlags.Monster,
 					ModelType.Weapon => ObjectFilterFlags.Weapon,
-					_ => ObjectFilterFlags.Chara
-				};
+					_ => ObjectFilterFlags.None
+				} | ObjectFilterFlags.Chara;
 				break;
 			default:
 				break;

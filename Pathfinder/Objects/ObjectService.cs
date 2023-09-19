@@ -57,11 +57,18 @@ public class ObjectService : IDisposable {
 		
 		return objects.Where(worldObj => {
 			var result = true;
+			
+			// Object flags
+			if (!config.Filters.Flags.HasFlag(worldObj.FilterType))
+				return false;
+			
+			// Distance
 			var objPos = new Vector2(worldObj.Position.X, worldObj.Position.Z);
 			var dist = Vector2.Distance(pos, objPos);
 			if (min.Enabled) result &= dist > min.Value;
 			if (max.Enabled) result &= dist < max.Value;
 			if (result) worldObj.Distance = dist;
+			
 			return result;
 		});
 	}

@@ -25,10 +25,13 @@ public class OverlayWindow : Window, IDisposable {
 	private readonly IGameGui _gui;
 
 	private IObjectClient? _client;
+
+	private const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
+		| ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus;
 	
 	public OverlayWindow(MainWindow _mainWin, ConfigService _config, ObjectService _objects, IClientState _state, IGameGui _gui) : base(
 		"##PathfinderOverlay",
-		ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoSavedSettings
+		WindowFlags
 	) {
 		this._mainWin = _mainWin;
 

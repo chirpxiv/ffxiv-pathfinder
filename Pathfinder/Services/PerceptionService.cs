@@ -28,7 +28,7 @@ public class PerceptionService {
 		return new Vector2(pos.X, pos.Z);
 	}
 
-	public bool IsPlayerActive()
+	private bool IsPlayerActive()
 		=> this._state.IsLoggedIn && !(this._ui.CutsceneActive || this._ui.GposeActive);
 
 	private Vector3? GetPlayerPosition()
