@@ -50,20 +50,30 @@ public class MainWindow : Window, IDisposable {
 
 	public override void Draw() {
 		var config = this._config.Get();
-		
-		DrawButtons();
+        
+		DrawSearchFilter(config);
 		DrawObjectTable();
 		DrawPopups(config);
 	}
 	
-	// Top window buttons
+	// Results table
 
-	private void DrawButtons() {
-		if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Filter, "Filters"))
+	private void DrawSearchFilter(ConfigFile config) {
+		const FontAwesomeIcon FilterIcon = FontAwesomeIcon.Filter;
+		const string FilterText = "Filters";
+
+		var style = ImGui.GetStyle();
+		var spacing = style.ItemInnerSpacing.X;
+		var buttonWidth = spacing + style.CellPadding.X * 2 + ImGui.CalcTextSize(FilterText).X + UiBuilder.IconFont.FontSize;
+
+		ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - buttonWidth - spacing);
+		ImGui.InputTextWithHint("##ObjectSearchString", "Search paths...", ref config.Filters.SearchString, 255);
+
+		ImGui.SameLine(0, spacing);
+		
+		if (ImGuiComponents.IconButtonWithText(FilterIcon, FilterText))
 			ImGui.OpenPopup(FilterPopupId);
 	}
-	
-	// Results table
 
 	private void DrawObjectTable() {
 		ImGui.BeginChildFrame(0x0B75, ImGui.GetContentRegionAvail());
@@ -99,11 +109,6 @@ public class MainWindow : Window, IDisposable {
 		ImGui.EndChildFrame();
 	}
 
-	private string GetItemTypeString(ObjectInfo info) => info.Type switch {
-		ObjectType.CharacterBase => info.ModelType.ToString(),
-		var type => type.ToString()
-	};
-
 	private void SortTable(ImGuiTableColumnSortSpecsPtr sort, List<ObjectInfo> list) {
 		var sortDir = sort.SortDirection == ImGuiSortDirection.Ascending ? -1 : 1;
 		list.Sort((a, b) => {
@@ -123,6 +128,11 @@ public class MainWindow : Window, IDisposable {
 			};
 		});
 	}
+	
+	private string GetItemTypeString(ObjectInfo info) => info.Type switch {
+		ObjectType.CharacterBase => info.ModelType.ToString(),
+		var type => type.ToString()
+	};
 	
 	// Popups
 

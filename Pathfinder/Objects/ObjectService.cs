@@ -51,15 +51,15 @@ public class ObjectService : IDisposable {
 	private IEnumerable<ObjectInfo> ApplyFilter(IEnumerable<ObjectInfo> objects) {
 		var pos = this._wis.GetPosition2D();
 
-		var config = this._config.Get();
-		var min = config.Filters.MinRadius;
-		var max = config.Filters.MaxRadius;
+		var filter = this._config.Get().Filters;
+		var min = filter.MinRadius;
+		var max = filter.MaxRadius;
 		
 		return objects.Where(worldObj => {
 			var result = true;
 			
 			// Object flags
-			if (!config.Filters.Flags.HasFlag(worldObj.FilterType))
+			if (!filter.Flags.HasFlag(worldObj.FilterType))
 				return false;
 			
 			// Distance
@@ -68,6 +68,10 @@ public class ObjectService : IDisposable {
 			if (min.Enabled) result &= dist > min.Value;
 			if (max.Enabled) result &= dist < max.Value;
 			if (result) worldObj.Distance = dist;
+			
+			// Search string
+			if (result && filter.SearchString != string.Empty)
+				result &= worldObj.ResourcePaths.Any(path => path.Contains(filter.SearchString, StringComparison.OrdinalIgnoreCase));
 			
 			return result;
 		});
