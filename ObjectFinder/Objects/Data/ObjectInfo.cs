@@ -34,6 +34,7 @@ public class ObjectInfo {
 	public ObjectFilterFlags FilterType;
 	
 	public Vector3 Position;
+	public float Distance; // Stub
 	
 	public readonly List<string> ResourcePaths = new();
 	

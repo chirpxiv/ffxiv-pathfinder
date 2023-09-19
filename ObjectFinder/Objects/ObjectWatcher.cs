@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using Dalamud.Game;
+using Dalamud.Logging;
 
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
@@ -43,24 +45,41 @@ public class ObjectWatcher : IDisposable {
 	
 	// Update handler
 
-	private unsafe void OnUpdate(object _sender) {
+	private void OnUpdate(object _sender) {
 		if (!this.IsEnabled) return;
-		
-		var world = World.Instance();
-		if (world == null) return;
 
-		var worldObj = new WorldObject(&world->Object);
-		var objects = RecurseObjects(worldObj)
+		var objects = RecurseWorld()
 			.Where(obj => obj.ObjectType is ObjectType.BgObject or ObjectType.Terrain or ObjectType.CharacterBase)
 			.Select(obj => obj.GetObjectInfo());
-
+		
 		this.OnObjectsUpdated?.Invoke(this, objects);
 	}
 
-	private IEnumerable<WorldObject> RecurseObjects(WorldObject worldObj) {
+	private unsafe WorldObject? GetWorld() {
+		var world = World.Instance();
+		return world != null ? new WorldObject(&world->Object) : null;
+	}
+
+	private IEnumerable<WorldObject> RecurseWorld() {
+		var worldObj = GetWorld();
+		if (worldObj == null) yield break;
+
+		yield return worldObj;
+		
+		foreach (var sibling in worldObj.GetSiblings()) {
+			yield return sibling;
+			foreach (var child in RecurseChildren(sibling))
+				yield return child;
+		}
+
+		foreach (var child in RecurseChildren(worldObj))
+			yield return child;
+	}
+
+	private IEnumerable<WorldObject> RecurseChildren(WorldObject worldObj) {
 		foreach (var child in worldObj.GetChildren()) {
 			yield return child;
-			foreach (var reChild in RecurseObjects(child))
+			foreach (var reChild in RecurseChildren(child))
 				yield return reChild;
 		}
 	}

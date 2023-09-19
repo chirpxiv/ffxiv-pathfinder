@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using Dalamud.Logging;
+
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
 using ObjectFinder.Interop.Unmanaged;
@@ -30,8 +32,9 @@ public class WorldObject {
 	
 	private unsafe WorldObject? GetFirstChild() {
 		if (this.Pointer.IsNull) return null;
-		var child = this.Pointer.Data->ChildObject;
-		return child != null ? new WorldObject(child) : null;
+		var ptr = this.Pointer.Data;
+		var child = ptr->ChildObject;
+		return child != null && child != ptr ? new WorldObject(child) : null;
 	}
 
 	private unsafe WorldObject? NextSibling() {
@@ -47,10 +50,21 @@ public class WorldObject {
 		var child = GetFirstChild();
 		if (child == null) yield break;
 		yield return child;
+        
+		var firstSibling = child.NextSibling();
+		var sibling = firstSibling;
+		while (sibling != null && sibling.Pointer.Address != this.Pointer.Address && sibling.Pointer.Address != child.Pointer.Address) {
+			yield return sibling;
+			sibling = sibling.NextSibling();
+			if (sibling?.Pointer.Address == firstSibling?.Pointer.Address)
+				break;
+		}
+	}
 
-		var i = 0;
-		var sibling = child.NextSibling();
-		while (sibling != null && sibling.Pointer.Address != this.Pointer.Address && i++ < 100) {
+	public IEnumerable<WorldObject> GetSiblings() {
+		var sibling = NextSibling();
+        
+		while (sibling != null && sibling.Pointer.Address != this.Pointer.Address) {
 			yield return sibling;
 			sibling = sibling.NextSibling();
 		}
