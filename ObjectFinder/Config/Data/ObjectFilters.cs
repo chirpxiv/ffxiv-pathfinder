@@ -4,7 +4,7 @@ namespace ObjectFinder.Config.Data;
 
 public class ObjectFilters {
 	public ObjectFilterFlags Flags;
-        
-	public float MinRadius = 1.0f;
-	public float MaxRadius = 5.0f;
+
+	public (bool Enabled, float Value) MinRadius = (true, 1.0f);
+	public (bool Enabled, float Value) MaxRadius = (true, 5.0f);
 }

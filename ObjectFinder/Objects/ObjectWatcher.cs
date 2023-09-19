@@ -11,7 +11,9 @@ using ObjectFinder.Objects.Data;
 using ObjectFinder.Interop.Structs;
 using ObjectFinder.Services.Core.Attributes;
 
-namespace ObjectFinder.Objects; 
+namespace ObjectFinder.Objects;
+
+public delegate void ObjectsUpdatedHandler(ObjectWatcher sender, IEnumerable<ObjectInfo> objects);
 
 [GlobalService]
 public class ObjectWatcher : IDisposable {
@@ -26,6 +28,10 @@ public class ObjectWatcher : IDisposable {
 		this._framework.Update += OnUpdate;
 	}
 	
+	// Events
+
+	public ObjectsUpdatedHandler? OnObjectsUpdated;
+	
 	// State
 
 	private bool __enabled;
@@ -34,39 +40,21 @@ public class ObjectWatcher : IDisposable {
 		get => this.__enabled && !this.IsDisposed;
 		private set => this.__enabled = value;
 	}
-
-	public void Start() => this.IsEnabled = true;
-
-	public void Stop() => this.IsEnabled = false;
-	
-	// Objects
-
-	private readonly List<ObjectInfo> _objects = new();
-
-	public IReadOnlyList<ObjectInfo> GetObjects() {
-		lock (this._objects) {
-			return this._objects.AsReadOnly();
-		}
-	}
 	
 	// Update handler
 
 	private unsafe void OnUpdate(object _sender) {
 		if (!this.IsEnabled) return;
-        
+		
 		var world = World.Instance();
 		if (world == null) return;
 
 		var worldObj = new WorldObject(&world->Object);
-
 		var objects = RecurseObjects(worldObj)
 			.Where(obj => obj.ObjectType is ObjectType.BgObject or ObjectType.Terrain or ObjectType.CharacterBase)
 			.Select(obj => obj.GetObjectInfo());
-		
-		lock (this._objects) {
-			this._objects.Clear();
-			this._objects.AddRange(objects);
-		}
+
+		this.OnObjectsUpdated?.Invoke(this, objects);
 	}
 
 	private IEnumerable<WorldObject> RecurseObjects(WorldObject worldObj) {
@@ -77,14 +65,35 @@ public class ObjectWatcher : IDisposable {
 		}
 	}
 	
+	// IObservable
+
+	private readonly List<IObjectClient> _clients = new();
+
+	private bool HasClients => this._clients.Count > 0;
+
+	public void AddClient(IObjectClient client) {
+		this._clients.Add(client);
+		this.IsEnabled |= this.HasClients;
+	}
+
+	public void Remove(IObjectClient client) {
+		this._clients.Remove(client);
+		this.IsEnabled &= this.HasClients;
+	}
+	
 	// Disposal
 
 	private bool IsDisposed;
 
 	public void Dispose() {
 		if (this.IsDisposed) return;
+		
 		this.IsDisposed = true;
 		this.IsEnabled = false;
+		
 		this._framework.Update -= OnUpdate;
+		this.OnObjectsUpdated = null;
+		
+		this._clients.Clear();
 	}
 }
