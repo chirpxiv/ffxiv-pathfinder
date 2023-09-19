@@ -1,10 +1,11 @@
 ﻿using System;
 
-using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Logging;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using ObjectFinder.Config;
 using ObjectFinder.Events;
 using ObjectFinder.Services.Core;
 
@@ -31,6 +32,8 @@ public sealed class ObjectFinder : IDalamudPlugin {
 				.CreateProvider();
 				
 			factory.Initialize(this._services);
+
+			this._services.GetRequiredService<ConfigService>().Load();
 
 			using var _initEvent = this._services.GetRequiredService<InitEvent>();
 			_initEvent.Invoke();

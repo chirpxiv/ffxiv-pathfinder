@@ -8,7 +8,7 @@ using HandlerDelegate = Dalamud.Game.Command.CommandInfo.HandlerDelegate;
 using ObjectFinder.Events;
 using ObjectFinder.Interface;
 using ObjectFinder.Interface.Windows;
-using ObjectFinder.Services.Attributes;
+using ObjectFinder.Services.Core.Attributes;
 
 namespace ObjectFinder.Services; 
 

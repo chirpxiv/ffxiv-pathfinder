@@ -7,7 +7,8 @@ using Dalamud.Interface.Windowing;
 using Microsoft.Extensions.DependencyInjection;
 
 using ObjectFinder.Events;
-using ObjectFinder.Services.Attributes;
+using ObjectFinder.Interface.Windows;
+using ObjectFinder.Services.Core.Attributes;
 
 namespace ObjectFinder.Interface; 
 
@@ -30,17 +31,23 @@ public class PluginGui : IDisposable {
 	private Action Draw => this._windows.Draw;
 
 	private void OnInit() {
+		AddWindow<MainWindow>();
+		AddWindow<OverlayWindow>();
 		this._ui.Draw += this.Draw;
 	}
 	
 	// Window management
 
+	private T AddWindow<T>() where T : Window {
+		var window = this._scope.ServiceProvider.GetRequiredService<T>();
+		this._windows.AddWindow(window);
+		return window;
+	}
+
 	public T GetWindow<T>() where T : Window {
 		if (this._windows.Windows.FirstOrDefault(w => w is T) is T window)
 			return window;
-		window = this._scope.ServiceProvider.GetRequiredService<T>();
-		this._windows.AddWindow(window);
-		return window;
+		return AddWindow<T>();
 	}
 	
 	// Disposal
