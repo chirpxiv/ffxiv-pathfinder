@@ -52,12 +52,22 @@ public class MainWindow : Window, IDisposable {
 
 	public override void Draw() {
 		var config = this._config.Get();
+		DrawOverlayControls(config);
 		ImGui.Spacing();
 		DrawRadiusControls(config);
 		ImGui.Spacing();
 		DrawSearchFilter(config);
 		DrawObjectTable();
 		DrawPopups(config);
+	}
+	
+	// Overlay controls
+
+	private void DrawOverlayControls(ConfigFile config) {
+		ImGui.Checkbox(
+			config.Overlay.DrawAll ? "Overlay enabled" : "Overlay disabled",
+			ref config.Overlay.DrawAll
+		);
 	}
 	
 	// Radius controls
@@ -91,8 +101,7 @@ public class MainWindow : Window, IDisposable {
 		string fmt = "%0.3f",
 		string slideText = "",
 		string? toggleTooltip = null,
-		string? drawTooltip = null,
-		string? labelTooltip = null
+		string? drawTooltip = null
 	) {
 		const FontAwesomeIcon OnIcon = FontAwesomeIcon.Eye;
 		const FontAwesomeIcon OffIcon = FontAwesomeIcon.EyeSlash;
@@ -114,7 +123,7 @@ public class MainWindow : Window, IDisposable {
 		
 		// Value slider
 		ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - dragWidth - drawWidth - spacing * 2);
-		var changed = ImGui.SliderFloat($"{id}_Slider", ref control.Value, 0.01f, 100.0f, slideText);
+		var changed = ImGui.SliderFloat($"{id}_Slider", ref control.Value, 0.01f, 100.0f, slideText, ImGuiSliderFlags.NoInput);
 		ImGui.SameLine(0, spacing);
 
 		// Value drag

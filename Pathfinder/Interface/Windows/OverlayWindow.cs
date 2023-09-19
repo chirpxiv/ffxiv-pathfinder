@@ -10,6 +10,7 @@ using Dalamud.Interface.Windowing;
 using Pathfinder.Config;
 using Pathfinder.Objects;
 using Pathfinder.Objects.Data;
+using Pathfinder.Services;
 using Pathfinder.Services.Core.Attributes;
 
 namespace Pathfinder.Interface.Windows; 
@@ -20,8 +21,8 @@ public class OverlayWindow : Window, IDisposable {
 
 	private readonly ConfigService _config;
 	private readonly ObjectService _objects;
+	private readonly PerceptionService _wis;
 	
-	private readonly IClientState _state;
 	private readonly IGameGui _gui;
 
 	private IObjectClient? _client;
@@ -29,7 +30,13 @@ public class OverlayWindow : Window, IDisposable {
 	private const ImGuiWindowFlags WindowFlags = ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground
 		| ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus;
 	
-	public OverlayWindow(MainWindow _mainWin, ConfigService _config, ObjectService _objects, IClientState _state, IGameGui _gui) : base(
+	public OverlayWindow(
+		MainWindow _mainWin,
+		ConfigService _config,
+		ObjectService _objects,
+		PerceptionService _wis,
+		IGameGui _gui
+	) : base(
 		"##PathfinderOverlay",
 		WindowFlags
 	) {
@@ -37,8 +44,8 @@ public class OverlayWindow : Window, IDisposable {
 
 		this._config = _config;
 		this._objects = _objects;
+		this._wis = _wis;
 		
-		this._state = _state;
 		this._gui = _gui;
 	}
 	
@@ -58,13 +65,13 @@ public class OverlayWindow : Window, IDisposable {
 	}
 
 	public override void Draw() {
-		var playerPos = this._state.LocalPlayer?.Position;
-		if (playerPos == null) return;
-
 		var config = this._config.Get();
+		if (!config.Overlay.DrawAll) return;
+
+		var pos = this._wis.GetPosition();
 		var drawList = ImGui.GetBackgroundDrawList();
-		DrawRadiusCircles(config, drawList, playerPos.Value);
-        DrawObjectPaths(config, drawList, playerPos.Value);
+		DrawRadiusCircles(config, drawList, pos);
+        DrawObjectPaths(config, drawList, pos);
 	}
 	
 	// Radius circle

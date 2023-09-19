@@ -1,6 +1,7 @@
 ﻿namespace Pathfinder.Config.Data; 
 
 public class OverlayDisplay {
+	public bool DrawAll = true;
 	public bool DrawMin = true;
 	public bool DrawMax = true;
 	public bool DrawLineTo = true;
