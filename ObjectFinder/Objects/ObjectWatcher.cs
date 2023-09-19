@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 
 using Dalamud.Game;
-using Dalamud.Logging;
 
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
@@ -67,7 +66,6 @@ public class ObjectWatcher : IDisposable {
 		lock (this._objects) {
 			this._objects.Clear();
 			this._objects.AddRange(objects);
-			PluginLog.Information($"Added {this._objects.Count} objects");
 		}
 	}
 
