@@ -73,9 +73,9 @@ public class OverlayWindow : Window, IDisposable {
 	private readonly Vector2[] Points = new Vector2[PointCount];
 
 	private void DrawRadiusCircles(ConfigFile config, ImDrawListPtr drawList, Vector3 centerPos) {
-		if (config.Overlay.DrawMin)
-			DrawRadiusCircle(drawList, centerPos, config.Filters.MinRadius.Value, config.Overlay.MinColor);
-		if (config.Overlay.DrawMax)
+		if (config.Filters.MinRadius.Enabled && config.Overlay.DrawMin)
+			DrawRadiusCircle(drawList, centerPos, Math.Min(config.Filters.MinRadius.Value, config.Filters.MaxRadius.Value), config.Overlay.MinColor);
+		if (config.Filters.MaxRadius.Enabled && config.Overlay.DrawMax)
 			DrawRadiusCircle(drawList, centerPos, config.Filters.MaxRadius.Value, config.Overlay.MaxColor);
 	}
 	
