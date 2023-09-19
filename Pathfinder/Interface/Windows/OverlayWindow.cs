@@ -80,14 +80,17 @@ public class OverlayWindow : Window, IDisposable {
 	}
 	
 	private void DrawRadiusCircle(ImDrawListPtr drawList, Vector3 pos, float radius, uint color = 0xFFFFFFFF, float thickness = 5f) {
+		var start = 0;
 		for (var n = 0; n < PointCount; n++) {
 			var x = radius * (float)Math.Sin((Math.PI * 2.0f) * (n / 360.0f)) + pos.X;
 			var z = radius * (float)Math.Cos((Math.PI * 2.0f) * (n / 360.0f)) + pos.Z;
-			this._gui.WorldToScreen(pos with { X = x, Z = z }, out var point);
-			this.Points[n] = point;
+			var vis = this._gui.WorldToScreen(pos with { X = x, Z = z }, out this.Points[n]);
+			if (vis && n != PointCount - 1) continue;
+			
+			var ct = n - start + (vis ? 1 : 0);
+            drawList.AddPolyline(ref this.Points[start], ct, color, ImDrawFlags.RoundCornersAll, thickness);
+			start = n;
 		}
-        
-		drawList.AddPolyline(ref this.Points[0], PointCount, color, ImDrawFlags.RoundCornersAll, thickness);
 	}
 	
 	// Object path render
