@@ -1,5 +1,6 @@
 ﻿using Dalamud.IoC;
 using Dalamud.Game;
+using Dalamud.Game.Gui;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
@@ -11,6 +12,7 @@ internal sealed class DalamudServices {
 	private readonly DalamudPluginInterface _api;
 	[PluginService] private ICommandManager _cmd { get; set; } = null!;
 	[PluginService] private Framework _framework { get; set; } = null!;
+	[PluginService] private ChatGui _chat { get; set; } = null!;
 	[PluginService] private IGameGui _gui { get; set; } = null!;
 	[PluginService] private IClientState _state { get; set; } = null!;
 
@@ -24,6 +26,7 @@ internal sealed class DalamudServices {
         .AddSingleton(this._api.UiBuilder)
         .AddSingleton(this._cmd)
 		.AddSingleton(this._framework)
+		.AddSingleton(this._chat)
         .AddSingleton(this._gui)
 		.AddSingleton(this._state);
 }

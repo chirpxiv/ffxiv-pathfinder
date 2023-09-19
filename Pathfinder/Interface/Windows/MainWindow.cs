@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
-using ObjectType = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.ObjectType;
 
 using ImGuiNET;
 
@@ -14,6 +13,7 @@ using Pathfinder.Config.Data;
 using Pathfinder.Interface.Widgets;
 using Pathfinder.Objects;
 using Pathfinder.Objects.Data;
+using Pathfinder.Services;
 using Pathfinder.Services.Core.Attributes;
 
 namespace Pathfinder.Interface.Windows; 
@@ -23,13 +23,17 @@ public class MainWindow : Window, IDisposable {
 	private readonly ConfigService _config;
 	private readonly ObjectService _objects;
 
+	private readonly ChatService _chat;
+
 	private IObjectClient? _client;
 	
-	public MainWindow(ConfigService _config, ObjectService _objects) : base(
+	public MainWindow(ConfigService _config, ObjectService _objects, ChatService _chat) : base(
 		"Pathfinder"
 	) {
 		this._config = _config;
 		this._objects = _objects;
+
+		this._chat = _chat;
 
 		var displaySize = ImGui.GetIO().DisplaySize;
 		this.Size = displaySize * 0.325f;
@@ -204,16 +208,72 @@ public class MainWindow : Window, IDisposable {
 			ImGui.Text($"{info.Distance:0.00}");
 			
 			ImGui.TableSetColumnIndex(1);
-			ImGui.Text(GetItemTypeString(info));
+			ImGui.Text(info.GetItemTypeString());
 
 			ImGui.TableSetColumnIndex(2);
-			foreach (var path in info.ResourcePaths)
-				ImGui.Text(path);
+            
+			var count = info.Models.Count;
+			if (count > 1) {
+				ImGui.PushID($"Object_{info.Address:X}");
+
+				var imKey = ImGui.GetID("Expand");
+				var state = ImGui.GetStateStorage();
+				var isExpand = state.GetBool(imKey);
+                
+				if (DrawColumnSelect($"{count} Entries (Click to {(isExpand ? "collapse" : "expand")})", isExpand)) {
+					isExpand = !isExpand;
+					state.SetBool(imKey, isExpand);
+				}
+                
+				if (isExpand) DrawModelList(info);
+			} else {
+				var text = info.Models.FirstOrDefault()?.Path ?? string.Empty;
+				DrawPath(text);
+			}
 		}
 		
 		ImGui.EndTable();
 		
 		ImGui.EndChildFrame();
+	}
+
+	private void DrawModelList(ObjectInfo info) {
+		var dim = Helpers.DimColor(ImGuiCol.Text, 0.80f);
+		foreach (var mdl in info.Models) {
+			ImGui.TableNextRow();
+            
+			ImGui.TableSetColumnIndex(1);
+			ImGui.Text(mdl.GetSlotString());
+
+			ImGui.TableSetColumnIndex(2);
+			var indent = ImGui.GetColumnWidth() * 0.065f;
+			ImGui.Indent(indent);
+			DrawPath(mdl.Path);
+			ImGui.Unindent(indent);
+		}
+		if (dim) ImGui.PopStyleColor(1);
+	}
+
+	private bool DrawColumnSelect(string content, bool selected = false) {
+		var style = ImGui.GetStyle();
+		var spacing = ImGui.GetItemRectSize().Y - (style.ItemSpacing.Y + style.ItemInnerSpacing.Y) * 2;
+		ImGui.PushStyleVar(
+			ImGuiStyleVar.ItemSpacing,
+			ImGui.GetStyle().ItemSpacing with { Y = spacing }
+		);
+		
+		try {
+			ImGui.SetCursorPosY(ImGui.GetCursorPosY() + spacing / 2);
+			return ImGui.Selectable(content, selected);
+		} finally {
+			ImGui.PopStyleVar();
+		}
+	}
+
+	private void DrawPath(string path) {
+		if (!DrawColumnSelect(path)) return;
+		ImGui.SetClipboardText(path);
+		this._chat.PrintMessage($"Model path copied to clipboard:\n{path}");
 	}
 
 	private void SortTable(ImGuiTableColumnSortSpecsPtr sort, List<ObjectInfo> list) {
@@ -222,24 +282,19 @@ public class MainWindow : Window, IDisposable {
 			return sort.ColumnIndex switch {
 				0 => a.Distance < b.Distance ? sortDir : -sortDir,
 				1 => string.Compare(
-					GetItemTypeString(a),
-					GetItemTypeString(b),
+						a.GetItemTypeString(),
+						b.GetItemTypeString(),
 						StringComparison.Ordinal
 					) * sortDir,
 				2 => string.Compare(
-						string.Join(' ', a.ResourcePaths),
-						string.Join(' ', b.ResourcePaths),
+						string.Join(' ', a.Models.Select(mdl => mdl.Path)),
+						string.Join(' ', b.Models.Select(mdl => mdl.Path)),
 						StringComparison.Ordinal
 					) * sortDir,
 				_ => 0
 			};
 		});
 	}
-	
-	private string GetItemTypeString(ObjectInfo info) => info.Type switch {
-		ObjectType.CharacterBase => info.ModelType.ToString(),
-		var type => type.ToString()
-	};
 	
 	// Popups
 

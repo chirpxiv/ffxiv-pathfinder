@@ -20,9 +20,33 @@ public class ObjectInfo {
 	public ObjectFilterFlags FilterType;
 	
 	public Vector3 Position;
-	public float Distance; // Stub
+	public float Distance;
+
+	public HumanData? HumanData;
 	
-	public readonly List<string> ResourcePaths = new();
+	public readonly List<ModelData> Models = new();
+	
+	/*public string GetItemTypeString() => this.Type switch {
+		ObjectType.CharacterBase => this.ModelType switch {
+			ModelType.Human when this.HumanData is {} data => $"{data.Gender.ToString()} {data.Clan.ToString()}",
+			var type => type.ToString()
+		},
+		var type => type.ToString()
+	};*/
+
+	public string GetItemTypeString() {
+		var type = this.Type;
+
+		if (type == ObjectType.CharacterBase) {
+			var mdlType = this.ModelType;
+			var result = mdlType.ToString();
+			if (mdlType == ModelType.Human && this.HumanData is { } data)
+				result += $"\n{(data.Gender == 0 ? '♂' : '♀')} {data.Clan}";
+			return result;
+		}
+
+		return type.ToString();
+	}
 	
 	// Factory
 	
@@ -59,12 +83,17 @@ public class ObjectInfo {
 		}
 	}
 	
+	// Models
+
+	private void AddModel(string path, int slot = 0, bool human = false)
+		=> this.Models.Add(new ModelData { Path = path, Slot = slot, IsHuman = human });
+	
 	// BgObject handler
 
 	private unsafe void ReadBgObject(Pointer<BgObject> ptr) {
 		var resource = ptr.Data->ResourceHandle;
 		if (resource != null)
-			this.ResourcePaths.Add(resource->FileName.ToString());
+			AddModel(resource->FileName.ToString());
 	}
 	
 	// Terrain handler
@@ -72,12 +101,34 @@ public class ObjectInfo {
 	private unsafe void ReadTerrain(Pointer<Terrain> ptr) {
 		var resource = ptr.Data->ResourceHandle;
 		if (resource != null)
-			this.ResourcePaths.Add(resource->FileName.ToString());
+			AddModel(resource->FileName.ToString());
 	}
 	
 	// CharacterBase handler
 
 	private unsafe void ReadCharaBase(Pointer<CharacterBase> ptr) {
 		this.ModelType = ptr.Data->GetModelType();
+
+		var isHuman = this.ModelType == ModelType.Human;
+		if (isHuman) ReadHuman(ptr.Cast<Human>());
+		
+		if (ptr.Data->Models == null) return;
+		
+		var modelCt = ptr.Data->SlotCount;
+		for (var i = 0; i < modelCt; i++) {
+			var model = ptr.Data->Models[i];
+			if (model == null || model->ModelResourceHandle == null) continue;
+            
+			var path =  model->ModelResourceHandle->ResourceHandle.FileName.ToString();
+			AddModel(path, i, isHuman);
+		}
+	}
+
+	private unsafe void ReadHuman(Pointer<Human> ptr) {
+		var custom = ptr.Data->Customize;
+		this.HumanData = new HumanData {
+			Clan = (Clan)custom.Clan,
+			Gender = custom.Sex
+		};
 	}
 }

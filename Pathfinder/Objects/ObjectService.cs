@@ -71,7 +71,7 @@ public class ObjectService : IDisposable {
 			
 			// Search string
 			if (result && filter.SearchString != string.Empty)
-				result &= worldObj.ResourcePaths.Any(path => path.Contains(filter.SearchString, StringComparison.OrdinalIgnoreCase));
+				result &= worldObj.Models.Any(data => data.Path.Contains(filter.SearchString, StringComparison.OrdinalIgnoreCase));
 			
 			return result;
 		});

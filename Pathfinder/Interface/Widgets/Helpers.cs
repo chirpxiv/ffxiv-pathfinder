@@ -12,7 +12,11 @@ public static class Helpers {
 	public unsafe static bool DimColor(ImGuiCol col, float factor) {
 		var ptr = ImGui.GetStyleColorVec4(col);
 		if (ptr == null) return false;
-		ImGui.PushStyleColor(col, *ptr * factor);
+		var value = *ptr;
+		value.X *= factor;
+		value.Y *= factor;
+		value.Z *= factor;
+		ImGui.PushStyleColor(col, value);
 		return true;
 	}
 }

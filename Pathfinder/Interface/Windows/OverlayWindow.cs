@@ -119,7 +119,7 @@ public class OverlayWindow : Window, IDisposable {
 
 			point.X += 5;
 			ImGui.SetCursorScreenPos(point);
-			ImGui.Text(string.Join("\n", info.ResourcePaths));
+			ImGui.Text(string.Join("\n", info.Models.Select(mdl => mdl.Path)));
 		}
 	}
 	
