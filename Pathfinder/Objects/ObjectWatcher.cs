@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 using Dalamud.Game;
-using Dalamud.Logging;
 
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
 using Pathfinder.Events;
-using Pathfinder.Interop.Structs;
 using Pathfinder.Objects.Data;
+using Pathfinder.Interop.Structs;
 using Pathfinder.Services.Core.Attributes;
 
 namespace Pathfinder.Objects;

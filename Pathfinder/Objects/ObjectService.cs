@@ -3,11 +3,10 @@ using System.Linq;
 using System.Numerics;
 using System.Collections.Generic;
 
-using Dalamud.Plugin.Services;
-
 using Pathfinder.Config;
 using Pathfinder.Events;
 using Pathfinder.Objects.Data;
+using Pathfinder.Services;
 using Pathfinder.Services.Core.Attributes;
 
 namespace Pathfinder.Objects;
@@ -17,13 +16,13 @@ public class ObjectService : IDisposable {
 	private readonly ObjectWatcher _watcher;
 
 	private readonly ConfigService _config;
-	private readonly IClientState _state;
+	private readonly PerceptionService _wis;
 	
-	public ObjectService(ObjectWatcher _watcher, ConfigService _config, IClientState _state, InitEvent _init) {
+	public ObjectService(ObjectWatcher _watcher, ConfigService _config, PerceptionService _wis, InitEvent _init) {
 		this._watcher = _watcher;
 
 		this._config = _config;
-		this._state = _state;
+		this._wis = _wis;
 		
 		_init.Subscribe(OnInit);
 	}
@@ -50,10 +49,7 @@ public class ObjectService : IDisposable {
 	}
 
 	private IEnumerable<ObjectInfo> ApplyFilter(IEnumerable<ObjectInfo> objects) {
-		var playerPos = this._state.LocalPlayer?.Position;
-		if (playerPos == null) return objects;
-
-		var playerPos2d = new Vector2(playerPos.Value.X, playerPos.Value.Z);
+		var pos = this._wis.GetPosition2D();
 
 		var config = this._config.Get();
 		var min = config.Filters.MinRadius;
@@ -61,8 +57,8 @@ public class ObjectService : IDisposable {
 		
 		return objects.Where(worldObj => {
 			var result = true;
-			var pos2d = new Vector2(worldObj.Position.X, worldObj.Position.Z);
-			var dist = Vector2.Distance(playerPos2d, pos2d);
+			var objPos = new Vector2(worldObj.Position.X, worldObj.Position.Z);
+			var dist = Vector2.Distance(pos, objPos);
 			if (min.Enabled) result &= dist > min.Value;
 			if (max.Enabled) result &= dist < max.Value;
 			if (result) worldObj.Distance = dist;

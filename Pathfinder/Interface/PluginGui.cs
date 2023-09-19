@@ -33,6 +33,8 @@ public class PluginGui : IDisposable {
 	private void OnInit() {
 		AddWindow<MainWindow>();
 		AddWindow<OverlayWindow>();
+		this._ui.DisableGposeUiHide = true;
+		this._ui.DisableCutsceneUiHide = true;
 		this._ui.Draw += this.Draw;
 	}
 	

@@ -45,7 +45,7 @@ public class MainWindow : Window, IDisposable {
 	private void DrawObjectTable() {
 		ImGui.BeginChildFrame(0x0B75, ImGui.GetContentRegionAvail());
         
-		ImGui.BeginTable("##ObjectSearchTable.11234", 3, ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable);
+		ImGui.BeginTable("##ObjectSearchTable", 3, ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable);
 		
 		var avail = ImGui.GetContentRegionAvail().X;
 		ImGui.TableSetupColumn("Distance", ImGuiTableColumnFlags.DefaultSort, avail * 0.125f);

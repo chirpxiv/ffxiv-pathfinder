@@ -23,7 +23,9 @@ public enum ObjectFilterFlags {
 	Human = Chara | 16,
 	DemiHuman = Chara | 32,
 	Monster = Chara | 64,
-	Weapon = Chara | 128
+	Weapon = Chara | 128,
+	
+	All = 255
 }
 
 public class ObjectInfo {
