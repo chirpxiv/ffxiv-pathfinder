@@ -4,8 +4,7 @@ using Dalamud.Plugin;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using ObjectFinder.Events.Impl;
-using ObjectFinder.Services.Attributes;
+using ObjectFinder.Services.Core.Attributes;
 
 namespace ObjectFinder.Services.Core; 
 
@@ -26,12 +25,12 @@ public class ServiceFactory : IDisposable {
 	
 	// Resolver
 
-	private ServiceResolver<ServiceAttribute>? Resolver;
+	private ServiceResolver? Resolver;
 	
-	private ServiceResolver<ServiceAttribute> GetResolver()
-		=> this.Resolver ??= new ServiceResolver<ServiceAttribute>(this.Services);
+	private ServiceResolver GetResolver()
+		=> this.Resolver ??= new ServiceResolver(this.Services);
 
-	private ServiceResolver<ServiceAttribute> ConsumeResolver() {
+	private ServiceResolver ConsumeResolver() {
 		var inst = GetResolver();
 		if (inst == null) throw new Exception("Invalid resolver state.");
 		this.Resolver = null;
@@ -50,7 +49,7 @@ public class ServiceFactory : IDisposable {
 		this.GetResolver()
 			.AddSingletons<GlobalServiceAttribute>()
 			.AddSingletons<ServiceEventAttribute>()
-			.AddScoped<LocalServiceAttribute>();
+			.AddLocal<LocalServiceAttribute>();
 		return this;
 	}
 

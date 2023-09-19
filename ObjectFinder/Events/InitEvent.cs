@@ -1,7 +1,7 @@
 ﻿using System;
 
 using ObjectFinder.Events.Impl;
-using ObjectFinder.Services.Attributes;
+using ObjectFinder.Services.Core.Attributes;
 
 namespace ObjectFinder.Events;
 

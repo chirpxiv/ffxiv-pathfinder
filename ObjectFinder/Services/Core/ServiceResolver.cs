@@ -7,12 +7,14 @@ using Dalamud.Logging;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using ObjectFinder.Services.Core.Attributes;
+
 namespace ObjectFinder.Services.Core;
 
-public class ServiceResolver<A> where A : Attribute {
+public class ServiceResolver {
 	// Constructor
 
-	private readonly Type BaseType = typeof(A);
+	private readonly Type BaseType = typeof(ServiceAttribute);
 	
 	private readonly IServiceCollection _services;
 
@@ -43,27 +45,34 @@ public class ServiceResolver<A> where A : Attribute {
 	
 	// Factory methods
 	
-	private IEnumerable<Type> GetByAttribute<B>() where B : A {
+	private IEnumerable<Type> GetByAttribute<A>() where A : ServiceAttribute {
 		GetTypes();
-		return this.Types.Where(TypeHasAttribute<B>);
+		return this.Types.Where(TypeHasAttribute<A>);
 	}
 
-	public ServiceResolver<A> AddSingletons<B>() where B : A {
-		foreach (var type in GetByAttribute<B>())
+	public ServiceResolver AddSingletons<A>() where A: ServiceAttribute {
+		foreach (var type in GetByAttribute<A>())
 			this._services.AddSingleton(type);
 		return this;
 	}
 
-	public ServiceResolver<A> AddScoped<B>() where B : A {
-		foreach (var type in GetByAttribute<B>())
-			this._services.AddScoped(type);
+	public ServiceResolver AddLocal<A>() where A : LocalServiceAttribute {
+		foreach (var type in GetByAttribute<A>()) {
+			var attr = type.GetCustomAttribute<A>()!;
+			if (attr.HasFlag(ServiceFlags.Transient))
+				this._services.AddTransient(type);
+			else
+				this._services.AddScoped(type);
+		}
 		return this;
 	}
+
+	public ServiceResolver AddLocal() => this.AddLocal<LocalServiceAttribute>();
 	
 	// Service access
 
-	public IEnumerable<ServiceDescriptor> GetServices<B>() where B : A => this._services
-		.Where(desc => TypeHasAttribute<B>(desc.ServiceType));
+	public IEnumerable<ServiceDescriptor> GetServices<A>() where A: ServiceAttribute => this._services
+		.Where(desc => TypeHasAttribute<A>(desc.ServiceType));
 	
 	// Attribute helpers
 
