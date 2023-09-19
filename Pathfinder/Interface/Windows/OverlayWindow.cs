@@ -28,7 +28,7 @@ public class OverlayWindow : Window, IDisposable {
 	
 	public OverlayWindow(MainWindow _mainWin, ConfigService _config, ObjectService _objects, IClientState _state, IGameGui _gui) : base(
 		"##PathfinderOverlay",
-		ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs
+		ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoSavedSettings
 	) {
 		this._mainWin = _mainWin;
 

@@ -19,8 +19,18 @@ public class MainWindow : Window, IDisposable {
 
 	private IObjectClient? _client;
     
-	public MainWindow(ObjectService _objects) : base("Pathfinder") {
+	public MainWindow(ObjectService _objects) : base(
+		"Pathfinder"
+	) {
 		this._objects = _objects;
+
+		var displaySize = ImGui.GetIO().DisplaySize;
+		this.Size = displaySize * 0.325f;
+		this.SizeCondition = ImGuiCond.FirstUseEver;
+		this.SizeConstraints = new WindowSizeConstraints {
+			MinimumSize = displaySize * 0.1f,
+			MaximumSize = displaySize
+		};
 	}
 	
 	// UI draw
@@ -86,7 +96,7 @@ public class MainWindow : Window, IDisposable {
 						string.Join(' ', b.ResourcePaths),
 						StringComparison.Ordinal
 					) * sortDir,
-				3 => 0
+				_ => 0
 			};
 		});
 	}
