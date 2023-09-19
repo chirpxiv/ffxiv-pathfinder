@@ -8,4 +8,11 @@ public static class Helpers {
 		if (hover) ImGui.SetTooltip(text);
 		return hover;
 	}
+	
+	public unsafe static bool DimColor(ImGuiCol col, float factor) {
+		var ptr = ImGui.GetStyleColorVec4(col);
+		if (ptr == null) return false;
+		ImGui.PushStyleColor(col, *ptr * factor);
+		return true;
+	}
 }

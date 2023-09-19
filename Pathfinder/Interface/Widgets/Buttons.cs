@@ -16,15 +16,15 @@ public static class Buttons {
 			ImGui.PopFont();
 		}
 	}
-    
+	
 	public static bool IconButton(string id, FontAwesomeIcon icon, Vector2? size = null) {
 		ImGui.PushFont(UiBuilder.IconFont);
 		try {
-			size ??= Vector2.Zero;
+			size ??= CalcIconButtonSize(icon);
 			ImGui.BeginGroup();
 			var cX = ImGui.GetCursorPosX();
 			var result = ImGui.Button(id, size.Value);
-            ImGui.SameLine(0, 0);
+			ImGui.SameLine(0, 0);
 			ImGui.SetCursorPosX(cX + (size.Value.X - CalcIconSize(icon).X) / 2);
 			ImGui.Text(icon.ToIconString());
 			ImGui.EndGroup();
@@ -33,7 +33,15 @@ public static class Buttons {
 			ImGui.PopFont();
 		}
 	}
-
+	
+	public static Vector2 CalcIconButtonSize(FontAwesomeIcon icon) {
+		var height = ImGui.GetFrameHeight();
+		return new Vector2(
+			Math.Max(CalcIconSize(icon).X, height),
+			height
+		);
+	}
+	
 	public static Vector2 CalcIconToggleSize(FontAwesomeIcon iconOn, FontAwesomeIcon iconOff) => new(
 		Math.Max(
 			CalcIconSize(iconOn).X,
@@ -48,4 +56,21 @@ public static class Buttons {
 		if (toggle) value = !value;
 		return toggle;
 	}
+	
+	public unsafe static bool IconToggleButtonColored(string id, ref bool value, FontAwesomeIcon iconOn, FontAwesomeIcon iconOff) {
+		var i = 0;
+		if (!value) i = DimColor(ImGuiCol.Text, 0.90f)
+			+ DimColor(ImGuiCol.Button, 0.75f)
+			+ DimColor(ImGuiCol.ButtonActive, 0.75f)
+			+ DimColor(ImGuiCol.ButtonHovered, 0.75f);
+		
+		try {
+			return IconToggleButton(id, ref value, iconOn, iconOff);
+		} finally {
+			if (i > 0) ImGui.PopStyleColor(i);
+		}
+	}
+
+	private static int DimColor(ImGuiCol col, float factor)
+		=> Helpers.DimColor(col, factor) ? 1 : 0;
 }

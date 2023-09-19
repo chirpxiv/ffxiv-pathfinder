@@ -26,6 +26,11 @@ public class ObjectFilters {
 
 	public string SearchString = string.Empty;
 
-	public (bool Enabled, float Value) MinRadius = (true, 0.5f);
-	public (bool Enabled, float Value) MaxRadius = (true, 2.5f);
+	public FilterConstraint MinRadius = new() { Value = 0.5f };
+	public FilterConstraint MaxRadius = new() { Value = 2.5f };
+}
+
+public class FilterConstraint {
+	public bool Enabled = true;
+	public float Value = 1.0f;
 }

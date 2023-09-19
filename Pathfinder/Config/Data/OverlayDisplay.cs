@@ -1,12 +1,21 @@
 ﻿namespace Pathfinder.Config.Data; 
 
 public class OverlayDisplay {
-	public bool DrawAll = true;
-	public bool DrawMin = true;
-	public bool DrawMax = true;
-	public bool DrawLineTo = true;
-        
-	public uint MinColor = 0x6FFFFFFF;
-	public uint MaxColor = 0x8FFFFFFF;
-	public uint LineToColor = 0xFFFFFFFF;
+	public bool Enabled = true;
+
+	public OverlayElement Min = new() {
+		Color = 0x6FFFFFFF,
+		Width = 1.5f
+	};
+
+	public OverlayElement Max = new() {
+		Color = 0x8FFFFFFF,
+		Width = 2.0f
+	};
+}
+
+public class OverlayElement {
+	public bool Draw = true;
+	public uint Color = 0xFFFFFFFF;
+	public float Width = 2.0f;
 }

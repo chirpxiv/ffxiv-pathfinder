@@ -8,6 +8,7 @@ using Dalamud.Plugin.Services;
 using Dalamud.Interface.Windowing;
 
 using Pathfinder.Config;
+using Pathfinder.Config.Data;
 using Pathfinder.Objects;
 using Pathfinder.Objects.Data;
 using Pathfinder.Services;
@@ -66,7 +67,7 @@ public class OverlayWindow : Window, IDisposable {
 
 	public override void Draw() {
 		var config = this._config.Get();
-		if (!config.Overlay.DrawAll) return;
+		if (!config.Overlay.Enabled) return;
 
 		var pos = this._wis.GetPosition();
 		var drawList = ImGui.GetBackgroundDrawList();
@@ -80,18 +81,25 @@ public class OverlayWindow : Window, IDisposable {
 	private readonly Vector2[] Points = new Vector2[PointCount];
 
 	private void DrawRadiusCircles(ConfigFile config, ImDrawListPtr drawList, Vector3 centerPos) {
-		if (config.Filters.MinRadius.Enabled && config.Overlay.DrawMin)
-			DrawRadiusCircle(drawList, centerPos, Math.Min(config.Filters.MinRadius.Value, config.Filters.MaxRadius.Value), config.Overlay.MinColor);
-		if (config.Filters.MaxRadius.Enabled && config.Overlay.DrawMax)
-			DrawRadiusCircle(drawList, centerPos, config.Filters.MaxRadius.Value, config.Overlay.MaxColor);
+		var minRadius = Math.Min(config.Filters.MinRadius.Value, config.Filters.MaxRadius.Value);
+		var maxRadius = Math.Max(minRadius, config.Filters.MaxRadius.Value);
+		if (config.Filters.MinRadius.Enabled)
+			DrawRadiusCircle(drawList, centerPos, minRadius, config.Overlay.Min);
+		if (config.Filters.MaxRadius.Enabled)
+			DrawRadiusCircle(drawList, centerPos, maxRadius, config.Overlay.Max);
 	}
-	
-	private void DrawRadiusCircle(ImDrawListPtr drawList, Vector3 pos, float radius, uint color = 0xFFFFFFFF, float thickness = 5f) {
+
+	private void DrawRadiusCircle(ImDrawListPtr drawList, Vector3 centerPos, float radius, OverlayElement data) {
+		if (!data.Draw) return;
+		DrawRadiusCircle(drawList, centerPos, radius, data.Color, data.Width);
+	}
+
+	private void DrawRadiusCircle(ImDrawListPtr drawList, Vector3 centerPos, float radius, uint color = 0xFFFFFFFF, float thickness = 2f) {
 		var start = 0;
 		for (var n = 0; n < PointCount; n++) {
-			var x = radius * (float)Math.Sin((Math.PI * 2.0f) * (n / 360.0f)) + pos.X;
-			var z = radius * (float)Math.Cos((Math.PI * 2.0f) * (n / 360.0f)) + pos.Z;
-			var vis = this._gui.WorldToScreen(pos with { X = x, Z = z }, out this.Points[n]);
+			var x = radius * (float)Math.Sin((Math.PI * 2.0f) * (n / 360.0f)) + centerPos.X;
+			var z = radius * (float)Math.Cos((Math.PI * 2.0f) * (n / 360.0f)) + centerPos.Z;
+			var vis = this._gui.WorldToScreen(centerPos with { X = x, Z = z }, out this.Points[n]);
 			if (vis && n != PointCount - 1) continue;
 			
 			var ct = n - start + (vis ? 1 : 0);

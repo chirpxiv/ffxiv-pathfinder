@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Numerics;
 
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -48,60 +47,80 @@ public class MainWindow : Window, IDisposable {
 	
 	// UI draw
 
+	private const string SettingsPopupId = "PathfindSettingsPopup";
 	private const string FilterPopupId = "ObjectFilterPopup";
 
 	public override void Draw() {
 		var config = this._config.Get();
-		DrawOverlayControls(config);
-		ImGui.Spacing();
-		DrawRadiusControls(config);
+		DrawContextControls(config);
 		ImGui.Spacing();
 		DrawSearchFilter(config);
 		DrawObjectTable();
 		DrawPopups(config);
 	}
 	
-	// Overlay controls
+	// Context controls
 
-	private void DrawOverlayControls(ConfigFile config) {
+	private void DrawContextControls(ConfigFile config) {
+        ImGui.BeginGroup();
+		
 		ImGui.Checkbox(
-			config.Overlay.DrawAll ? "Overlay enabled" : "Overlay disabled",
-			ref config.Overlay.DrawAll
+			config.Overlay.Enabled ? "Overlay enabled" : "Overlay disabled",
+			ref config.Overlay.Enabled
 		);
+		
+		ImGui.SameLine(0, 0);
+
+		var avail = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X;
+
+		const FontAwesomeIcon SettingsIcon = FontAwesomeIcon.Cog;
+		ImGui.SetCursorPosX(avail - Buttons.CalcIconButtonSize(SettingsIcon).X);
+		if (Buttons.IconButton("##PathfindSettings", SettingsIcon))
+			ImGui.OpenPopup(SettingsPopupId);
+		
+		ImGui.EndGroup();
+		
+		ImGui.Spacing();
+		DrawRadiusControls(config);
 	}
 	
 	// Radius controls
 
 	private void DrawRadiusControls(ConfigFile config) {
+		var uiEnabled = config.Overlay.Enabled;
+		
 		DrawRadiusControl(
 			"##MaxRadius",
 			ref config.Filters.MaxRadius,
-			ref config.Overlay.DrawMax,
+			ref config.Overlay.Max.Draw,
 			"< %0.3f",
 			"Max Range",
 			"Toggle the maximum range requirement.\nDisabling this may cause visual clutter and lag in large areas!",
-			"Toggle rendering for the outer line."
+			"Toggle rendering for the outer line.",
+			uiEnabled
 		);
 		
 		DrawRadiusControl(
 			"##MinRadius",
 			ref config.Filters.MinRadius,
-			ref config.Overlay.DrawMin,
+			ref config.Overlay.Min.Draw,
 			"> %0.3f",
 			"Min Range",
 			"Toggle the minimum range requirement.\nThis is helpful if you don't want to see your own character, weapons, etc.",
-			"Toggle rendering for the inner line."
+			"Toggle rendering for the inner line.",
+			uiEnabled
 		);
 	}
 
 	private bool DrawRadiusControl(
 		string id,
-		ref (bool Enabled, float Value) control,
+		ref FilterConstraint control,
 		ref bool draw,
 		string fmt = "%0.3f",
 		string slideText = "",
 		string? toggleTooltip = null,
-		string? drawTooltip = null
+		string? drawTooltip = null,
+		bool uiEnabled = true
 	) {
 		const FontAwesomeIcon OnIcon = FontAwesomeIcon.Eye;
 		const FontAwesomeIcon OffIcon = FontAwesomeIcon.EyeSlash;
@@ -132,9 +151,11 @@ public class MainWindow : Window, IDisposable {
 		ImGui.SameLine(0, spacing);
 		
 		// Overlay toggle
-		Buttons.IconToggleButton($"{id}_Toggle_Draw", ref draw, OnIcon, OffIcon);
+		ImGui.BeginDisabled(!uiEnabled);
+		Buttons.IconToggleButtonColored($"{id}_Toggle_Draw", ref draw, OnIcon, OffIcon);
 		if (drawTooltip != null)
 			Helpers.HoverTooltip(drawTooltip);
+		ImGui.EndDisabled();
 		
 		ImGui.EndDisabled();
 		
@@ -156,7 +177,7 @@ public class MainWindow : Window, IDisposable {
 		ImGui.InputTextWithHint("##ObjectSearchString", "Search paths...", ref config.Filters.SearchString, 255);
 
 		ImGui.SameLine(0, spacing);
-		
+        
 		if (ImGuiComponents.IconButtonWithText(FilterIcon, FilterText))
 			ImGui.OpenPopup(FilterPopupId);
 	}
@@ -223,13 +244,38 @@ public class MainWindow : Window, IDisposable {
 	// Popups
 
 	private void DrawPopups(ConfigFile config) {
+		ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, ImGui.GetStyle().WindowRounding);
 		try {
-			ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, ImGui.GetStyle().WindowRounding);
+			DrawSettings(config);
 			DrawFilters(config);
 		} finally {
 			ImGui.PopStyleVar();
 		}
 	}
+	
+	// Settings
+
+	private void DrawSettings(ConfigFile config) {
+		if (!ImGui.BeginPopup(SettingsPopupId)) return;
+
+		DrawCircleSettings("Outer circle display (Max range)", ref config.Overlay.Max);
+		ImGui.Spacing();
+		DrawCircleSettings("Inner circle display (Min range)", ref config.Overlay.Min);
+		
+		ImGui.EndPopup();
+	}
+
+	private void DrawCircleSettings(string text, ref OverlayElement data) {
+		ImGui.Text(text);
+
+		var col4 = ImGui.ColorConvertU32ToFloat4(data.Color);
+		if (ImGui.ColorEdit4($"Color##{text}", ref col4))
+			data.Color = ImGui.ColorConvertFloat4ToU32(col4);
+		
+		ImGui.SliderFloat($"Width##{text}", ref data.Width, 1.0f, 10.0f);
+	}
+	
+	// Filters
 	
 	private void DrawFilters(ConfigFile config) {
 		if (!ImGui.BeginPopup(FilterPopupId)) return;
