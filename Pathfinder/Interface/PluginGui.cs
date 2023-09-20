@@ -36,6 +36,7 @@ public class PluginGui : IDisposable {
 		this._ui.DisableGposeUiHide = true;
 		this._ui.DisableCutsceneUiHide = true;
 		this._ui.Draw += this.Draw;
+		this._ui.OpenMainUi += OpenMainUi;
 	}
 	
 	// Window management
@@ -52,10 +53,17 @@ public class PluginGui : IDisposable {
 		return AddWindow<T>();
 	}
 	
+	// Events
+
+	private void OpenMainUi() {
+		this.GetWindow<MainWindow>().Toggle();
+	}
+	
 	// Disposal
 
 	public void Dispose() {
 		this._ui.Draw -= this.Draw;
+		this._ui.OpenMainUi -= OpenMainUi;
 		this._scope.Dispose();
 	}
 }
