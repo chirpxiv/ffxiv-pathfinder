@@ -30,4 +30,7 @@ public static class Helpers {
 		ImGui.PushStyleColor(col, value);
 		return true;
 	}
+
+	public static uint ColorAlpha(uint color, byte alpha)
+		=> color & 0x00FFFFFF | (uint)(alpha << 24);
 }

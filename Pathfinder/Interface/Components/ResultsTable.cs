@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Numerics;
 
 using ImGuiNET;
 
 using Pathfinder.Config;
+using Pathfinder.Interface.Shared;
 using Pathfinder.Objects.Data;
 using Pathfinder.Interface.Widgets;
 using Pathfinder.Services.Core.Attributes;
@@ -23,9 +25,13 @@ public class ResultsTable {
 	
 	// Constructor
 
+	private readonly ObjectUiCtx _ctx;
+
 	private readonly ChatService _chat;
 	
-	public ResultsTable(ChatService _chat) {
+	public ResultsTable(ObjectUiCtx _ctx, ChatService _chat) {
+		this._ctx = _ctx;
+		
 		this._chat = _chat;
 	}
 	
@@ -34,27 +40,36 @@ public class ResultsTable {
 	private void SetColumnIndex(Column column) => ImGui.TableSetColumnIndex((int)column);
 	
 	// UI Draw
-	
-	public void Draw(IObjectClient client, ConfigFile config, uint id = 0x0B75) {
-		var objects = client.GetObjects().ToList();
 
+	public void Draw(IObjectClient client, ConfigFile config, uint id = 0x0B75) {
+		this._ctx.Hovered = null;
+		
+		var avail = ImGui.GetContentRegionAvail();
+		if (ImGui.BeginChildFrame(id, avail)) {
+			DrawTable(client, config);
+			ImGui.EndChildFrame();
+		}
+	}
+
+	private void DrawTable(IObjectClient client, ConfigFile config) {
+        var avail = ImGui.GetContentRegionAvail();
+		if (avail.X < 1.0f || avail.Y < 1.0f) return;
+		
 		const ImGuiTableFlags TableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable | ImGuiTableFlags.ScrollX;
-		ImGui.BeginChildFrame(id, ImGui.GetContentRegionAvail());
 		ImGui.BeginTable("##ObjectSearchTable", 4, TableFlags);
-		
-		var avail = ImGui.GetContentRegionAvail().X;
-		ImGui.TableSetupColumn("Distance", ImGuiTableColumnFlags.DefaultSort, avail * 0.125f);
-		ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, avail * 0.175f);
-		ImGui.TableSetupColumn("Address", config.Table.ShowAddress ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled, avail * 0.25f);
-		ImGui.TableSetupColumn("Paths", ImGuiTableColumnFlags.None, avail * 0.7f);
-        ImGui.TableHeadersRow();
-		
-		SortTable(ImGui.TableGetSortSpecs().Specs, objects);
-		objects.ForEach(item => DrawObjectEntry(config, item));
-		
-		ImGui.EndTable();
-		
-		ImGui.EndChildFrame();
+        try {
+			ImGui.TableSetupColumn("Distance", ImGuiTableColumnFlags.DefaultSort, avail.X * 0.125f);
+			ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, avail.X * 0.175f);
+			ImGui.TableSetupColumn("Address", config.Table.ShowAddress ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled, avail.X * 0.25f);
+			ImGui.TableSetupColumn("Paths", ImGuiTableColumnFlags.None, avail.X * 0.7f);
+			ImGui.TableHeadersRow();
+
+			var objects = client.GetObjects().ToList();
+			SortTable(ImGui.TableGetSortSpecs().Specs, objects);
+			objects.ForEach(item => DrawObjectEntry(config, item));
+		} finally {
+			ImGui.EndTable();
+		}
 	}
 
 	private void DrawObjectEntry(ConfigFile config, ObjectInfo info) {
@@ -100,11 +115,14 @@ public class ResultsTable {
 				isExpand = !isExpand;
 				state.SetBool(imKey, isExpand);
 			}
+			
+			UpdateHover(info);
 				
 			if (isExpand) DrawModelList(info, showAddress);
 		} else {
 			var text = info.Models.FirstOrDefault()?.Path ?? string.Empty;
 			DrawPath(text);
+			UpdateHover(info);
 		}
 	}
 
@@ -125,6 +143,7 @@ public class ResultsTable {
 			var indent = ImGui.GetColumnWidth() * 0.065f;
 			ImGui.Indent(indent);
 			DrawPath(mdl.Path);
+			UpdateHover(info);
 			ImGui.Unindent(indent);
 		}
 		if (dim) ImGui.PopStyleColor(1);
@@ -157,6 +176,12 @@ public class ResultsTable {
 		} finally {
 			ImGui.PopStyleVar();
 		}
+	}
+
+	private void UpdateHover(ObjectInfo info) {
+		var spacing = new Vector2(0, ImGui.GetStyle().ColumnsMinSpacing);
+		if (ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax() + spacing))
+			this._ctx.Hovered = info;
 	}
 
 	private void SortTable(ImGuiTableColumnSortSpecsPtr sort, List<ObjectInfo> list) {

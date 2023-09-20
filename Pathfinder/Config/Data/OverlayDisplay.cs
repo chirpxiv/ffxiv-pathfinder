@@ -14,10 +14,12 @@ public class OverlayDisplay {
 	};
 
 	public OverlayDotElement ItemDot = new() {
-		Color = 0xFFFFFFFF,
-		OutlineColor = 0xFF000000,
 		Radius = 8.0f,
 		Width = 1.5f
+	};
+
+	public OverlayColElement HoverLine = new() {
+		Width = 6.0f
 	};
 }
 
@@ -27,9 +29,12 @@ public class OverlayElement {
 	public float Width = 2.0f;
 }
 
-public class OverlayDotElement : OverlayElement {
+public class OverlayColElement : OverlayElement {
 	public bool ColorOverride;
-	
+}
+
+public class OverlayDotElement : OverlayColElement {
 	public float Radius;
 	public uint OutlineColor = 0xFF000000;
+	public bool DimOnHover = true;
 }

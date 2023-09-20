@@ -14,11 +14,15 @@ using Pathfinder.Objects.Data;
 using Pathfinder.Services;
 using Pathfinder.Services.Core.Attributes;
 using Pathfinder.Interface.Components;
+using Pathfinder.Interface.Shared;
+using Pathfinder.Interface.Widgets;
 
 namespace Pathfinder.Interface.Windows; 
 
 [LocalService]
 public class OverlayWindow : Window, IDisposable {
+	private readonly ObjectUiCtx _ctx;
+	
 	private readonly ConfigService _config;
 	private readonly ObjectService _objects;
 	private readonly PerceptionService _wis;
@@ -34,6 +38,7 @@ public class OverlayWindow : Window, IDisposable {
 		| ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus;
 	
 	public OverlayWindow(
+		ObjectUiCtx _ctx,
 		ConfigService _config,
 		ObjectService _objects,
 		PerceptionService _wis,
@@ -44,6 +49,8 @@ public class OverlayWindow : Window, IDisposable {
 		"##PathfinderOverlay",
 		WindowFlags
 	) {
+		this._ctx = _ctx;
+		
 		this._config = _config;
 		this._objects = _objects;
 		this._wis = _wis;
@@ -74,6 +81,10 @@ public class OverlayWindow : Window, IDisposable {
 
 		var pos = this._wis.GetPosition();
 		var drawList = ImGui.GetBackgroundDrawList();
+		
+		if (config.Overlay.HoverLine.Draw && this._ctx.Hovered != null)
+			DrawLineTo(drawList, config, pos, this._ctx.Hovered);
+		
 		DrawRadiusCircles(config, drawList, pos);
 		DrawObjectDots(config, drawList);
 	}
@@ -104,9 +115,28 @@ public class OverlayWindow : Window, IDisposable {
 			return;
 
 		var color = dot.ColorOverride ? dot.Color : config.GetColor(info.FilterType);
+		var outlineColor = dot.OutlineColor;
+		if (config.Overlay.ItemDot.DimOnHover && this._ctx.Hovered != null && this._ctx.Hovered != info) {
+			color = Helpers.ColorAlpha(color, 0x70);
+			outlineColor = Helpers.ColorAlpha(outlineColor, 0x70);
+		}
+
 		drawList.AddCircleFilled(point, dot.Radius + dot.Width - 1.0f, color);
 		if (dot.Width > 0.0f)
-			drawList.AddCircle(point, dot.Radius + dot.Width / 2, dot.OutlineColor, 16, dot.Width);
+			drawList.AddCircle(point, dot.Radius + dot.Width / 2, outlineColor, 16, dot.Width);
+	}
+	
+	// Hover line
+
+	private void DrawLineTo(ImDrawListPtr drawList, ConfigFile config, Vector3 centerPos, ObjectInfo info) {
+		if (!this._gui.WorldToScreen(centerPos, out var centerPos2d))
+			return;
+
+		this._gui.WorldToScreen(info.Position, out var objectPos2d);
+
+		var line = config.Overlay.HoverLine;
+		var color = line.ColorOverride ? line.Color : config.GetColor(info.FilterType);
+		drawList.AddLine(centerPos2d, objectPos2d, color, line.Width);
 	}
 	
 	// Window close

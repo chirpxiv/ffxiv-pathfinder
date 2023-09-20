@@ -19,7 +19,7 @@ public class ConfigWindow : Window {
 
 	private readonly ConfigService _cfg;
 
-	public ConfigWindow(ConfigService _cfg) : base("Pathfinder Settings") {
+	public ConfigWindow(ConfigService _cfg) : base("Pathfinder1Settings") {
 		this._cfg = _cfg;
 	}
 	
@@ -27,6 +27,8 @@ public class ConfigWindow : Window {
 
 	public override void PreDraw() {
 		var displaySize = ImGui.GetIO().DisplaySize;
+		this.Size = displaySize * 0.325f;
+		this.SizeCondition = ImGuiCond.FirstUseEver;
 		this.SizeConstraints = new WindowSizeConstraints {
 			MinimumSize = displaySize * 0.1f,
 			MaximumSize = displaySize
@@ -61,7 +63,6 @@ public class ConfigWindow : Window {
 
 	private void DrawOverlayTab(ConfigFile cfg) {
 		ImGui.Text("Radius circle:");
-		
 		DrawCircleSettings("Display outer circle (Max range)", ref cfg.Overlay.Max);
 		ImGui.Spacing();
 		DrawCircleSettings("Display inner circle (Min range)", ref cfg.Overlay.Min);
@@ -69,12 +70,12 @@ public class ConfigWindow : Window {
 		ImGui.Spacing();
 		ImGui.Spacing();
 		ImGui.Text("Object dots:");
-		
 		DrawDotSettings("Display object dots", ref cfg.Overlay.ItemDot);
 		
-		// Hack to prevent dumb window proportions on first open.
-		ImGui.SameLine();
-		ImGui.Dummy(ImGui.GetItemRectSize() with { Y = 0 });
+		ImGui.Spacing();
+		ImGui.Spacing();
+		ImGui.Text("Object lines:");
+		DrawLineSettings("Display line when hovering", ref cfg.Overlay.HoverLine);
 	}
 	
 	private void DrawCircleSettings(string text, ref OverlayElement data) {
@@ -89,7 +90,7 @@ public class ConfigWindow : Window {
 	
 	private void DrawDotSettings(string text, ref OverlayDotElement dot) {
 		ImGui.Checkbox(text, ref dot.Draw);
-
+		ImGui.Checkbox("Dim color when hovering", ref dot.DimOnHover);
 		ImGui.Checkbox("Override dot color", ref dot.ColorOverride);
 
 		Vector4 col4;
@@ -104,8 +105,21 @@ public class ConfigWindow : Window {
 			dot.OutlineColor = ImGui.ColorConvertFloat4ToU32(col4);
 		
 		ImGui.SliderFloat($"Outline Width##{text}", ref dot.Width, 0.0f, 10.0f);
-		
 		ImGui.SliderFloat($"Dot Radius##{text}", ref dot.Radius, 1.0f, 20.0f);
+	}
+
+	private void DrawLineSettings(string text, ref OverlayColElement line) {
+		ImGui.Checkbox(text, ref line.Draw);
+		
+		ImGui.Checkbox("Override line color", ref line.ColorOverride);
+
+		if (line.ColorOverride) {
+			var col4 = ImGui.ColorConvertU32ToFloat4(line.Color);
+			if (ImGui.ColorEdit4($"Color##{text}", ref col4))
+				line.Color = ImGui.ColorConvertFloat4ToU32(col4);
+		}
+
+		ImGui.SliderFloat($"Width##{text}", ref line.Width, 1.0f, 20.0f);
 	}
 	
 	// Tabs: Colors

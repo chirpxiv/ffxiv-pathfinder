@@ -44,14 +44,6 @@ public class MainWindow : Window, IDisposable {
 		this._table = _table;
 		this._range = _range;
 		this._filters = _filters;
-
-		var displaySize = ImGui.GetIO().DisplaySize;
-		this.Size = displaySize * 0.325f;
-		this.SizeCondition = ImGuiCond.FirstUseEver;
-		this.SizeConstraints = new WindowSizeConstraints {
-			MinimumSize = displaySize * 0.1f,
-			MaximumSize = displaySize
-		};
 	}
 	
 	// Object access
@@ -63,6 +55,16 @@ public class MainWindow : Window, IDisposable {
 	
 	private const string FilterPopupId = "ObjectFilterPopup";
 	private const string OverlayPopupId = "OverlayPopup";
+
+	public override void PreDraw() {
+		var displaySize = ImGui.GetIO().DisplaySize;
+		this.Size = displaySize * 0.325f;
+		this.SizeCondition = ImGuiCond.FirstUseEver;
+		this.SizeConstraints = new WindowSizeConstraints {
+			MinimumSize = displaySize * 0.1f,
+			MaximumSize = displaySize
+		};
+	}
 
 	public override void Draw() {
 		var client = GetClient();
@@ -92,9 +94,8 @@ public class MainWindow : Window, IDisposable {
 		
 		ImGui.SameLine(0, 0);
 
-		var avail = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X;
-
 		const FontAwesomeIcon SettingsIcon = FontAwesomeIcon.Cog;
+		var avail = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X;
 		ImGui.SetCursorPosX(avail - Buttons.CalcIconButtonSize(SettingsIcon).X);
 		if (Buttons.IconButton("##PathfindSettings", SettingsIcon))
 			this._gui.GetWindow<ConfigWindow>().Toggle();
