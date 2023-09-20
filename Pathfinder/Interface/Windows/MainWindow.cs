@@ -62,6 +62,7 @@ public class MainWindow : Window, IDisposable {
 	// UI draw
 	
 	private const string FilterPopupId = "ObjectFilterPopup";
+	private const string OverlayPopupId = "OverlayPopup";
 
 	public override void Draw() {
 		var client = GetClient();
@@ -82,6 +83,12 @@ public class MainWindow : Window, IDisposable {
 			config.Overlay.Enabled ? "Overlay enabled" : "Overlay disabled",
 			ref config.Overlay.Enabled
 		);
+
+		ImGui.SameLine(0, ImGui.GetStyle().ItemSpacing.X);
+		ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 180f);
+		if (Buttons.IconButton("##OverlayPopup", FontAwesomeIcon.EllipsisH))
+			ImGui.OpenPopup(OverlayPopupId);
+		ImGui.PopStyleVar();
 		
 		ImGui.SameLine(0, 0);
 
@@ -123,9 +130,18 @@ public class MainWindow : Window, IDisposable {
 		ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, ImGui.GetStyle().WindowRounding);
 		try {
 			this._filters.Draw(FilterPopupId, config);
+			DrawOverlayPopup(config);
 		} finally {
 			ImGui.PopStyleVar();
 		}
+	}
+
+	private void DrawOverlayPopup(ConfigFile config) {
+		if (!ImGui.BeginPopup(OverlayPopupId)) return;
+
+		ImGui.Checkbox("Draw item dots", ref config.Overlay.ItemDot.Draw);
+		
+		ImGui.EndPopup();
 	}
 	
 	// Window close

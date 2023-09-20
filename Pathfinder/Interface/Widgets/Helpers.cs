@@ -15,7 +15,7 @@ public static class Helpers {
 	}
 	
 	public static bool HoverTooltip(string text) {
-		var hover = ImGui.IsItemHovered();
+		var hover = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled);
 		if (hover) ImGui.SetTooltip(text);
 		return hover;
 	}

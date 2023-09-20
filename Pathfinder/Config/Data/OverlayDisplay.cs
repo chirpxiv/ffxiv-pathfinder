@@ -28,6 +28,8 @@ public class OverlayElement {
 }
 
 public class OverlayDotElement : OverlayElement {
+	public bool ColorOverride;
+	
 	public float Radius;
 	public uint OutlineColor = 0xFF000000;
 }

@@ -17,7 +17,9 @@ public class ObjectInfo {
 	
 	public ObjectType Type;
 	public ModelType ModelType;
-	public ObjectFilterFlags FilterType;
+	
+	public WorldObjectType FilterFlags;
+	public WorldObjectType FilterType;
 	
 	public Vector3 Position;
 	public float Distance;
@@ -25,14 +27,6 @@ public class ObjectInfo {
 	public HumanData? HumanData;
 	
 	public readonly List<ModelData> Models = new();
-	
-	/*public string GetItemTypeString() => this.Type switch {
-		ObjectType.CharacterBase => this.ModelType switch {
-			ModelType.Human when this.HumanData is {} data => $"{data.Gender.ToString()} {data.Clan.ToString()}",
-			var type => type.ToString()
-		},
-		var type => type.ToString()
-	};*/
 
 	public string GetItemTypeString() {
 		var type = this.Type;
@@ -62,25 +56,28 @@ public class ObjectInfo {
 		switch (this.Type) {
 			case ObjectType.BgObject:
 				ReadBgObject(ptr.Cast<BgObject>());
-				this.FilterType = ObjectFilterFlags.BgObject;
+				this.FilterType = WorldObjectType.BgObject;
 				break;
 			case ObjectType.Terrain:
 				ReadTerrain(ptr.Cast<Terrain>());
-				this.FilterType = ObjectFilterFlags.Terrain;
+				this.FilterType = WorldObjectType.Terrain;
 				break;
 			case ObjectType.CharacterBase:
 				ReadCharaBase(ptr.Cast<CharacterBase>());
+				this.FilterFlags = WorldObjectType.Chara;
 				this.FilterType = this.ModelType switch {
-					ModelType.Human => ObjectFilterFlags.Human,
-					ModelType.DemiHuman => ObjectFilterFlags.DemiHuman,
-					ModelType.Monster => ObjectFilterFlags.Monster,
-					ModelType.Weapon => ObjectFilterFlags.Weapon,
-					_ => ObjectFilterFlags.None
-				} | ObjectFilterFlags.Chara;
+					ModelType.Human => WorldObjectType.Human,
+					ModelType.DemiHuman => WorldObjectType.DemiHuman,
+					ModelType.Monster => WorldObjectType.Monster,
+					ModelType.Weapon => WorldObjectType.Weapon,
+					_ => WorldObjectType.None
+				};
 				break;
 			default:
 				break;
 		}
+
+		this.FilterFlags |= this.FilterType;
 	}
 	
 	// Models

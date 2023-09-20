@@ -37,28 +37,41 @@ public class ResultsTable {
 	
 	public void Draw(IObjectClient client, ConfigFile config, uint id = 0x0B75) {
 		var objects = client.GetObjects().ToList();
-		
-		var showAddress = config.Table.ShowAddress;
 
-		ImGuiTableFlags TableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable | ImGuiTableFlags.ScrollX;
+		const ImGuiTableFlags TableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable | ImGuiTableFlags.ScrollX;
 		ImGui.BeginChildFrame(id, ImGui.GetContentRegionAvail());
 		ImGui.BeginTable("##ObjectSearchTable", 4, TableFlags);
 		
 		var avail = ImGui.GetContentRegionAvail().X;
 		ImGui.TableSetupColumn("Distance", ImGuiTableColumnFlags.DefaultSort, avail * 0.125f);
 		ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, avail * 0.175f);
-		ImGui.TableSetupColumn("Address", showAddress ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled, avail * 0.25f);
+		ImGui.TableSetupColumn("Address", config.Table.ShowAddress ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled, avail * 0.25f);
 		ImGui.TableSetupColumn("Paths", ImGuiTableColumnFlags.None, avail * 0.7f);
         ImGui.TableHeadersRow();
 		
 		SortTable(ImGui.TableGetSortSpecs().Specs, objects);
+		objects.ForEach(item => DrawObjectEntry(config, item));
 		
-		foreach (var info in objects) {
-			ImGui.TableNextRow();
-			
+		ImGui.EndTable();
+		
+		ImGui.EndChildFrame();
+	}
+
+	private void DrawObjectEntry(ConfigFile config, ObjectInfo info) {
+		var showAddress = config.Table.ShowAddress;
+		var useColors = config.Table.UseColors;
+		
+		ImGui.TableNextRow();
+
+		if (useColors) {
+			var color = config.GetColor(info.FilterType);
+			ImGui.PushStyleColor(ImGuiCol.Text, color);
+		}
+
+		try {
 			SetColumnIndex(Column.Distance);
 			ImGui.Text(info.Distance.ToString("0.00"));
-			
+
 			SetColumnIndex(Column.Type);
 			ImGui.Text(info.GetItemTypeString());
 
@@ -66,14 +79,12 @@ public class ResultsTable {
 				SetColumnIndex(Column.Address);
 				DrawAddress(info.Address);
 			}
-            
+
 			SetColumnIndex(Column.Paths);
 			DrawObjectPaths(info, showAddress);
+		} finally {
+			if (useColors) ImGui.PopStyleColor();
 		}
-		
-		ImGui.EndTable();
-		
-		ImGui.EndChildFrame();
 	}
 
 	private void DrawObjectPaths(ObjectInfo info, bool showAddress = false) {
@@ -85,7 +96,7 @@ public class ResultsTable {
 			var state = ImGui.GetStateStorage();
 			var isExpand = state.GetBool(imKey);
 				
-			if (DrawColumnSelect($"{count} Entries (Click to {(isExpand ? "collapse" : "expand")})", isExpand)) {
+			if (DrawColumnSelect($"{count} entries (Click to {(isExpand ? "collapse" : "expand")})", isExpand)) {
 				isExpand = !isExpand;
 				state.SetBool(imKey, isExpand);
 			}
@@ -152,16 +163,16 @@ public class ResultsTable {
 		var sortDir = sort.SortDirection == ImGuiSortDirection.Ascending ? -1 : 1;
 		list.Sort((a, b) => {
 			return sort.ColumnIndex switch {
-				0 => a.Distance < b.Distance ? sortDir : -sortDir,
-				1 => a.Address < b.Address ? sortDir : -sortDir,
+				0 => a.Distance.CompareTo(b.Distance) * sortDir,
+				1 => a.Address.CompareTo(b.Address) * sortDir,
 				2 => string.Compare(
 						a.GetItemTypeString(),
 						b.GetItemTypeString(),
 						StringComparison.Ordinal
 					) * sortDir,
 				3 => string.Compare(
-						string.Join(' ', a.Models.Select(mdl => mdl.Path)),
-						string.Join(' ', b.Models.Select(mdl => mdl.Path)),
+						a.Models.FirstOrDefault()?.Path,
+						b.Models.FirstOrDefault()?.Path,
 						StringComparison.Ordinal
 					) * sortDir,
 				_ => 0

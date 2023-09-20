@@ -3,7 +3,7 @@
 namespace Pathfinder.Config.Data; 
 
 [Flags]
-public enum ObjectFilterFlags {
+public enum WorldObjectType {
 	None = 0,
 	
 	BgObject = 0x1,
@@ -22,7 +22,7 @@ public enum ObjectFilterFlags {
 }
 
 public class ObjectFilters {
-	public ObjectFilterFlags Flags = ObjectFilterFlags.All;
+	public WorldObjectType Flags = WorldObjectType.All;
 
 	public string SearchString = string.Empty;
 

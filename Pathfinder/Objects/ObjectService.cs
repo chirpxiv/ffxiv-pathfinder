@@ -59,7 +59,7 @@ public class ObjectService : IDisposable {
 			var result = true;
 			
 			// Object flags
-			if (!filter.Flags.HasFlag(worldObj.FilterType))
+			if (!filter.Flags.HasFlag(worldObj.FilterFlags))
 				return false;
 			
 			// Distance

@@ -96,14 +96,15 @@ public class OverlayWindow : Window, IDisposable {
 		if (!dot.Draw) return;
 		
 		var objectInfo = GetClient().GetObjects().ToList();
-		objectInfo.ForEach(info => DrawObjectDot(drawList, dot, info));
+		objectInfo.ForEach(info => DrawObjectDot(drawList, config, dot, info));
 	}
 
-	private void DrawObjectDot(ImDrawListPtr drawList, OverlayDotElement dot, ObjectInfo info) {
+	private void DrawObjectDot(ImDrawListPtr drawList, ConfigFile config, OverlayDotElement dot, ObjectInfo info) {
 		if (!this._gui.WorldToScreen(info.Position, out var point))
 			return;
 
-		drawList.AddCircleFilled(point, dot.Radius + dot.Width - 1.0f, dot.Color);
+		var color = dot.ColorOverride ? dot.Color : config.GetColor(info.FilterType);
+		drawList.AddCircleFilled(point, dot.Radius + dot.Width - 1.0f, color);
 		if (dot.Width > 0.0f)
 			drawList.AddCircle(point, dot.Radius + dot.Width / 2, dot.OutlineColor, 16, dot.Width);
 	}
