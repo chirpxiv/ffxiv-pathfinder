@@ -26,13 +26,13 @@ public class ResultsTable {
 	// Constructor
 
 	private readonly ObjectUiCtx _ctx;
-
-	private readonly ChatService _chat;
+    
+	private readonly PerceptionService _wis;
 	
-	public ResultsTable(ObjectUiCtx _ctx, ChatService _chat) {
+	public ResultsTable(ObjectUiCtx _ctx, PerceptionService _wis) {
 		this._ctx = _ctx;
-		
-		this._chat = _chat;
+        
+		this._wis = _wis;
 	}
 	
 	// Column wrappers
@@ -154,16 +154,13 @@ public class ResultsTable {
 	}
 
 	private void DrawAddress(nint addr) {
-		var text = addr.ToString("X");
-		if (!DrawColumnSelect(text)) return;
-		ImGui.SetClipboardText(text);
-		this._chat.PrintMessage($"Address copied to clipboard: {text}");
+		if (DrawColumnSelect(addr.ToString("X")))
+			this._wis.SetClipboardAddress(addr);
 	}
 
 	private void DrawPath(string path) {
-		if (!DrawColumnSelect(path)) return;
-		ImGui.SetClipboardText(path);
-		this._chat.PrintMessage($"Model path copied to clipboard:\n{path}");
+		if (DrawColumnSelect(path))
+			this._wis.SetClipboardPath(path);
 	}
 	
 	private bool DrawColumnSelect(string content, bool selected = false) {
