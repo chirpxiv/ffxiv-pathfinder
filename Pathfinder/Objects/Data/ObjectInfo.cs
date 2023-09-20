@@ -85,8 +85,8 @@ public class ObjectInfo {
 	
 	// Models
 
-	private void AddModel(string path, int slot = 0, bool human = false)
-		=> this.Models.Add(new ModelData { Path = path, Slot = slot, IsHuman = human });
+	private void AddModel(string path, int slot = 0, bool human = false, nint address = 0)
+		=> this.Models.Add(new ModelData { Path = path, Slot = slot, IsHuman = human, Address = address});
 	
 	// BgObject handler
 
@@ -120,7 +120,7 @@ public class ObjectInfo {
 			if (model == null || model->ModelResourceHandle == null) continue;
             
 			var path =  model->ModelResourceHandle->ResourceHandle.FileName.ToString();
-			AddModel(path, i, isHuman);
+			AddModel(path, i, isHuman, (nint)model);
 		}
 	}
 

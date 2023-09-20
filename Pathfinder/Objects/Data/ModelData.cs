@@ -21,7 +21,8 @@ public enum ModelSlot {
 
 public class ModelData {
 	public bool IsHuman;
-	
+
+	public nint Address;
 	public required string Path;
 	public int Slot;
 
