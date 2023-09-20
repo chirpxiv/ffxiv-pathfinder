@@ -39,9 +39,10 @@ public class ResultsTable {
 		var objects = client.GetObjects().ToList();
 		
 		var showAddress = config.Table.ShowAddress;
-		
+
+		ImGuiTableFlags TableFlags = ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable | ImGuiTableFlags.ScrollX;
 		ImGui.BeginChildFrame(id, ImGui.GetContentRegionAvail());
-		ImGui.BeginTable("##ObjectSearchTable", 4, ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable);
+		ImGui.BeginTable("##ObjectSearchTable", 4, TableFlags);
 		
 		var avail = ImGui.GetContentRegionAvail().X;
 		ImGui.TableSetupColumn("Distance", ImGuiTableColumnFlags.DefaultSort, avail * 0.125f);
