@@ -94,12 +94,7 @@ public class OverlayWindow : Window, IDisposable {
 		var objectInfo = GetClient().GetObjects().ToList();
 		foreach (var info in objectInfo) {
 			if (!this._gui.WorldToScreen(info.Position, out var point)) continue;
-
 			drawList.AddCircleFilled(point, 5f, 0xFFFFFFFF);
-
-			point.X += 5;
-			ImGui.SetCursorScreenPos(point);
-			ImGui.Text(string.Join("\n", info.Models.Select(mdl => mdl.Path)));
 		}
 	}
 	

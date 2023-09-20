@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-using Dalamud.Game.Gui;
+using Dalamud.Plugin.Services;
 
 using ImGuiNET;
 
@@ -19,9 +19,9 @@ public class ImCircle3D {
 	
 	// Constructor
 
-	private readonly GameGui _gui;
+	private readonly IGameGui _gui;
 
-	public ImCircle3D(GameGui _gui) {
+	public ImCircle3D(IGameGui _gui) {
 		this._gui = _gui;
 	}
 	
