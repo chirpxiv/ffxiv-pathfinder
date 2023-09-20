@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 
 using Dalamud.Interface;
 using Dalamud.Plugin.Services;
@@ -56,5 +58,19 @@ public class PerceptionService {
 		ImGui.SetClipboardText(content);
 		if (msg != null)
 			this._chat.PrintMessage($"{msg}{delim}{content}");
+	}
+	
+	public void SetClipboardPaths(List<string> paths) {
+		switch (paths.Count) {
+			case 1:
+				SetClipboardPath(paths.First());
+				return;
+			case > 0:
+				var content = string.Join("\n", paths);
+				ImGui.SetClipboardText(content);
+				break;
+		}
+
+		this._chat.PrintMessage($"Copied {paths.Count} paths to clipboard.");
 	}
 }

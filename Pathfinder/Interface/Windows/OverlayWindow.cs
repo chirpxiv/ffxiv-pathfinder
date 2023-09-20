@@ -129,7 +129,8 @@ public class OverlayWindow : Window, IDisposable {
 	}
 
 	private void DrawHover(ConfigFile config, Vector2 point, OverlayDotElement dot, ObjectInfo info) {
-		if (this._ctx.HoveredThisFrame) return;
+		if (this._ctx.HoveredThisFrame || ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow))
+			return;
 		
 		var radius = 6.0f + dot.Radius + dot.Width / 2;
 		var radVec = new Vector2(radius, radius);
@@ -144,6 +145,10 @@ public class OverlayWindow : Window, IDisposable {
 		ImGui.Text(info.GetItemTypeString());
 		ImGui.PopStyleColor();
 		ImGui.EndTooltip();
+		
+		ImGui.SetNextFrameWantCaptureMouse(true);
+		if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+			this._wis.SetClipboardPaths(info.Models.Select(mdl => mdl.Path).ToList());
 	}
 	
 	// Hover line
