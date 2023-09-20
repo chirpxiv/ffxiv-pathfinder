@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
 
-using Dalamud.Logging;
-
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
 using Pathfinder.Interop.Unmanaged;
-using Pathfinder.Objects.Data;
 
-namespace Pathfinder.Interop.Structs;
+namespace Pathfinder.Objects.Data;
 
 // Wrapper around Object* with null checks enforced by the Pointer<T> class.
 
