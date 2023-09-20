@@ -23,10 +23,10 @@ internal sealed class DalamudServices {
 
 	internal void AddServices(ServiceCollection services) => services
 		.AddSingleton(this._api)
-        .AddSingleton(this._api.UiBuilder)
-        .AddSingleton(this._cmd)
+		.AddSingleton(this._api.UiBuilder)
+		.AddSingleton(this._cmd)
 		.AddSingleton(this._framework)
 		.AddSingleton(this._chat)
-        .AddSingleton(this._gui)
+		.AddSingleton(this._gui)
 		.AddSingleton(this._state);
 }

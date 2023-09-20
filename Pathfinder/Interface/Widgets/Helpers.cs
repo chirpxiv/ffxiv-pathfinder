@@ -6,7 +6,7 @@ namespace Pathfinder.Interface.Widgets;
 
 public static class Helpers {
 	public static void Hint(string text, FontAwesomeIcon icon = FontAwesomeIcon.QuestionCircle) {
-        ImGui.PushFont(UiBuilder.IconFont);
+		ImGui.PushFont(UiBuilder.IconFont);
 		ImGui.PushStyleColor(ImGuiCol.Text, 0x80FFFFFF);
 		ImGui.Text(icon.ToIconString());
 		ImGui.PopStyleColor();

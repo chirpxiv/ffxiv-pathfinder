@@ -50,7 +50,7 @@ public class WorldObject {
 		var child = GetFirstChild();
 		if (child == null) yield break;
 		yield return child;
-        
+		
 		var firstSibling = child.NextSibling();
 		var sibling = firstSibling;
 		while (sibling != null && sibling.Pointer.Address != this.Pointer.Address && sibling.Pointer.Address != child.Pointer.Address) {
@@ -63,7 +63,7 @@ public class WorldObject {
 
 	public IEnumerable<WorldObject> GetSiblings() {
 		var sibling = NextSibling();
-        
+		
 		while (sibling != null && sibling.Pointer.Address != this.Pointer.Address) {
 			yield return sibling;
 			sibling = sibling.NextSibling();

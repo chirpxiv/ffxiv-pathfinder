@@ -12,7 +12,7 @@ public class ConfigService : IDisposable {
 	private readonly DalamudPluginInterface _api;
 
 	private ConfigFile _config = null!;
-    
+	
 	public ConfigService(DalamudPluginInterface _api) {
 		this._api = _api;
 	}

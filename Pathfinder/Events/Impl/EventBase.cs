@@ -7,7 +7,7 @@ public abstract class EventBase<D> : IDisposable, IEvent<D> where D : Delegate {
 	private readonly HashSet<object> _subscribers = new();
 
 	// Subscribers
-    
+	
 	public IEventClient Subscribe(D handler) {
 		this._subscribers.Add(handler);
 		return new EventClient<D>(this, handler);

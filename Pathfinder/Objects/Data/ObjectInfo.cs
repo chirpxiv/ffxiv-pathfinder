@@ -13,7 +13,7 @@ using Pathfinder.Interop.Unmanaged;
 namespace Pathfinder.Objects.Data;
 
 public class ObjectInfo {
-    public nint Address;
+	public nint Address;
 	
 	public ObjectType Type;
 	public ModelType ModelType;
@@ -53,7 +53,7 @@ public class ObjectInfo {
 	public unsafe ObjectInfo(Pointer<Object> ptr) {
 		if (ptr == null)
 			throw new Exception("Null pointer passed into ObjectInfo. This should never happen!");
-        
+		
 		this.Address = ptr.Address;
 		
 		this.Type = ptr.Data->GetObjectType();
@@ -61,7 +61,7 @@ public class ObjectInfo {
 
 		switch (this.Type) {
 			case ObjectType.BgObject:
-                ReadBgObject(ptr.Cast<BgObject>());
+				ReadBgObject(ptr.Cast<BgObject>());
 				this.FilterType = ObjectFilterFlags.BgObject;
 				break;
 			case ObjectType.Terrain:
@@ -118,7 +118,7 @@ public class ObjectInfo {
 		for (var i = 0; i < modelCt; i++) {
 			var model = ptr.Data->Models[i];
 			if (model == null || model->ModelResourceHandle == null) continue;
-            
+			
 			var path =  model->ModelResourceHandle->ResourceHandle.FileName.ToString();
 			AddModel(path, i, isHuman, (nint)model);
 		}

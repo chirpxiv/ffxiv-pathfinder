@@ -24,7 +24,7 @@ public class CommandService : IDisposable {
 	}
 	
 	// Initialization
-    
+	
 	private readonly HashSet<string> Commands = new();
 
 	private void OnInit() {
@@ -75,7 +75,7 @@ public class CommandService : IDisposable {
 		}
 		
 		// Factory methods
-        
+		
 		public CommandFactory SetMessage(string message) {
 			this.ShowInHelp = true;
 			this.HelpMessage = message;

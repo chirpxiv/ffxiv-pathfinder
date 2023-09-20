@@ -60,7 +60,7 @@ public class MainWindow : Window, IDisposable {
 		=> this._client ??= this._objects.CreateClient();
 	
 	// UI draw
-    
+	
 	private const string FilterPopupId = "ObjectFilterPopup";
 
 	public override void Draw() {

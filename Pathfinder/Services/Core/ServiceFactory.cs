@@ -17,7 +17,7 @@ public class ServiceFactory : IDisposable {
 	
 	private readonly static ServiceProviderOptions ProviderOptions = new() {
 		ValidateScopes = true,
-        ValidateOnBuild = true
+		ValidateOnBuild = true
 	};
 
 	public ServiceProvider CreateProvider()

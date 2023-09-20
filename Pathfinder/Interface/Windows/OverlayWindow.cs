@@ -72,7 +72,7 @@ public class OverlayWindow : Window, IDisposable {
 		var pos = this._wis.GetPosition();
 		var drawList = ImGui.GetBackgroundDrawList();
 		DrawRadiusCircles(config, drawList, pos);
-        DrawObjectPaths(config, drawList, pos);
+		DrawObjectPaths(config, drawList, pos);
 	}
 	
 	// Radius circle
@@ -103,7 +103,7 @@ public class OverlayWindow : Window, IDisposable {
 			if (vis && n != PointCount - 1) continue;
 			
 			var ct = n - start + (vis ? 1 : 0);
-            drawList.AddPolyline(ref this.Points[start], ct, color, ImDrawFlags.RoundCornersAll, thickness);
+			drawList.AddPolyline(ref this.Points[start], ct, color, ImDrawFlags.RoundCornersAll, thickness);
 			start = n;
 		}
 	}
