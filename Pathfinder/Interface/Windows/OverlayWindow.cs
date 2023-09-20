@@ -8,6 +8,7 @@ using Dalamud.Plugin.Services;
 using Dalamud.Interface.Windowing;
 
 using Pathfinder.Config;
+using Pathfinder.Config.Data;
 using Pathfinder.Objects;
 using Pathfinder.Objects.Data;
 using Pathfinder.Services;
@@ -18,12 +19,12 @@ namespace Pathfinder.Interface.Windows;
 
 [LocalService]
 public class OverlayWindow : Window, IDisposable {
-	private readonly MainWindow _mainWin;
-	private readonly ImCircle3D _circle3d;
-
 	private readonly ConfigService _config;
 	private readonly ObjectService _objects;
 	private readonly PerceptionService _wis;
+	
+	private readonly MainWindow _mainWin;
+	private readonly ImCircle3D _circle3d;
 	
 	private readonly IGameGui _gui;
 
@@ -33,22 +34,22 @@ public class OverlayWindow : Window, IDisposable {
 		| ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus;
 	
 	public OverlayWindow(
-		MainWindow _mainWin,
-		ImCircle3D _circle3d,
 		ConfigService _config,
 		ObjectService _objects,
 		PerceptionService _wis,
+		MainWindow _mainWin,
+		ImCircle3D _circle3d,
 		IGameGui _gui
 	) : base(
 		"##PathfinderOverlay",
 		WindowFlags
 	) {
-		this._mainWin = _mainWin;
-		this._circle3d = _circle3d;
-
 		this._config = _config;
 		this._objects = _objects;
 		this._wis = _wis;
+		
+		this._mainWin = _mainWin;
+		this._circle3d = _circle3d;
 		
 		this._gui = _gui;
 	}
@@ -74,7 +75,7 @@ public class OverlayWindow : Window, IDisposable {
 		var pos = this._wis.GetPosition();
 		var drawList = ImGui.GetBackgroundDrawList();
 		DrawRadiusCircles(config, drawList, pos);
-		DrawObjectPaths(config, drawList, pos);
+		DrawObjectDots(config, drawList);
 	}
 	
 	// Radius circle
@@ -88,14 +89,23 @@ public class OverlayWindow : Window, IDisposable {
 			this._circle3d.Draw(drawList, centerPos, maxRadius, config.Overlay.Max);
 	}
 	
-	// Object path render
+	// Item dots
 
-	private void DrawObjectPaths(ConfigFile config, ImDrawListPtr drawList, Vector3 centerPos) {
+	private void DrawObjectDots(ConfigFile config, ImDrawListPtr drawList) {
+		var dot = config.Overlay.ItemDot;
+		if (!dot.Draw) return;
+		
 		var objectInfo = GetClient().GetObjects().ToList();
-		foreach (var info in objectInfo) {
-			if (!this._gui.WorldToScreen(info.Position, out var point)) continue;
-			drawList.AddCircleFilled(point, 5f, 0xFFFFFFFF);
-		}
+		objectInfo.ForEach(info => DrawObjectDot(drawList, dot, info));
+	}
+
+	private void DrawObjectDot(ImDrawListPtr drawList, OverlayDotElement dot, ObjectInfo info) {
+		if (!this._gui.WorldToScreen(info.Position, out var point))
+			return;
+
+		drawList.AddCircleFilled(point, dot.Radius + dot.Width - 1.0f, dot.Color);
+		if (dot.Width > 0.0f)
+			drawList.AddCircle(point, dot.Radius + dot.Width / 2, dot.OutlineColor, 16, dot.Width);
 	}
 	
 	// Window close

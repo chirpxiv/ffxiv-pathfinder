@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 
 using Dalamud.Interface.Windowing;
 
@@ -23,8 +24,16 @@ public class ConfigWindow : Window {
 	
 	// Draw UI
 
+	public override void PreDraw() {
+		var displaySize = ImGui.GetIO().DisplaySize;
+		this.SizeConstraints = new WindowSizeConstraints {
+			MinimumSize = displaySize * 0.1f,
+			MaximumSize = displaySize
+		};
+	}
+
 	public override void Draw() {
-		var cfg = this._cfg.Get();
+        var cfg = this._cfg.Get();
 		
 		if (ImGui.BeginTabBar("##PfConfigTabs")) {
 			DrawTab("Overlay", DrawOverlayTab, cfg);
@@ -49,9 +58,21 @@ public class ConfigWindow : Window {
 	// Tabs: Overlay
 
 	private void DrawOverlayTab(ConfigFile cfg) {
-		DrawCircleSettings("Outer circle display (Max range)", ref cfg.Overlay.Max);
+		ImGui.Text("Radius circle:");
+		
+		DrawCircleSettings("Display outer circle (Max range)", ref cfg.Overlay.Max);
 		ImGui.Spacing();
-		DrawCircleSettings("Inner circle display (Min range)", ref cfg.Overlay.Min);
+		DrawCircleSettings("Display inner circle (Min range)", ref cfg.Overlay.Min);
+		
+		ImGui.Spacing();
+		ImGui.Spacing();
+		ImGui.Text("Object dots:");
+		
+		DrawDotSettings("Display object dots", ref cfg.Overlay.ItemDot);
+		
+		// Hack to prevent dumb window proportions on first open.
+		ImGui.SameLine();
+		ImGui.Dummy(ImGui.GetItemRectSize() with { Y = 0 });
 	}
 	
 	private void DrawCircleSettings(string text, ref OverlayElement data) {
@@ -62,6 +83,22 @@ public class ConfigWindow : Window {
 			data.Color = ImGui.ColorConvertFloat4ToU32(col4);
 		
 		ImGui.SliderFloat($"Width##{text}", ref data.Width, 1.0f, 10.0f);
+	}
+	
+	private void DrawDotSettings(string text, ref OverlayDotElement dot) {
+		ImGui.Checkbox(text, ref dot.Draw);
+
+		var col4 = ImGui.ColorConvertU32ToFloat4(dot.Color);
+		if (ImGui.ColorEdit4($"Dot Color##{text}", ref col4))
+			dot.Color = ImGui.ColorConvertFloat4ToU32(col4);
+		
+		col4 = ImGui.ColorConvertU32ToFloat4(dot.OutlineColor);
+		if (ImGui.ColorEdit4($"Outline Color##{text}", ref col4))
+			dot.OutlineColor = ImGui.ColorConvertFloat4ToU32(col4);
+		
+		ImGui.SliderFloat($"Outline Width##{text}", ref dot.Width, 0.0f, 10.0f);
+		
+		ImGui.SliderFloat($"Dot Radius##{text}", ref dot.Radius, 1.0f, 20.0f);
 	}
 	
 	// Tabs: Advanced

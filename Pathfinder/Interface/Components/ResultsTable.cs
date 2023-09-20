@@ -65,7 +65,7 @@ public class ResultsTable {
 				SetColumnIndex(Column.Address);
 				DrawAddress(info.Address);
 			}
-
+            
 			SetColumnIndex(Column.Paths);
 			DrawObjectPaths(info, showAddress);
 		}
