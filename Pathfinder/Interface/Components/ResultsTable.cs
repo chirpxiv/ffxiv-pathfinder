@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.Numerics;
+using System.Collections.Generic;
 
 using ImGuiNET;
 
@@ -81,8 +81,10 @@ public class ResultsTable {
 			ImGui.PushStyleColor(ImGuiCol.Text, color);
 		}
 		
-		var dim = this._ctx is { Hovered: not null, SetterId: not 1 } && this._ctx.Hovered.Address != info.Address;
-		if (dim) Helpers.DimColor(ImGuiCol.Text, 0.65f);
+		var dim = config.Table.DimOnHover
+				&& this._ctx is { Hovered: not null, SetterId: not 1 }
+				&& this._ctx.Hovered.Address != info.Address;
+		if (dim) dim = Helpers.DimColor(ImGuiCol.Text, 0.65f);
 
 		try {
 			SetColumnIndex(Column.Distance);

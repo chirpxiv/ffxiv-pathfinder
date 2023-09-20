@@ -131,6 +131,10 @@ public class ConfigWindow : Window {
 			cfg.Overlay.ItemDot.ColorOverride = !ov;
 		
 		ImGui.Spacing();
+
+		ImGui.Checkbox("Dim table when hovering dot", ref cfg.Table.DimOnHover);
+		
+		ImGui.Spacing();
 		
 		ImGui.Text("Objects:");
 		DrawColor(cfg, WorldObjectType.Terrain);
