@@ -22,18 +22,18 @@ namespace Pathfinder.Interface.Windows;
 public class MainWindow : Window, IDisposable {
 	private readonly ConfigService _config;
 	private readonly ObjectService _objects;
-
 	private readonly ChatService _chat;
+	private readonly PluginGui _gui;
 
 	private IObjectClient? _client;
 	
-	public MainWindow(ConfigService _config, ObjectService _objects, ChatService _chat) : base(
+	public MainWindow(ConfigService _config, ObjectService _objects, ChatService _chat, PluginGui _gui) : base(
 		"Pathfinder"
 	) {
 		this._config = _config;
 		this._objects = _objects;
-
 		this._chat = _chat;
+		this._gui = _gui;
 
 		var displaySize = ImGui.GetIO().DisplaySize;
 		this.Size = displaySize * 0.325f;
@@ -50,8 +50,7 @@ public class MainWindow : Window, IDisposable {
 		=> this._client ??= this._objects.CreateClient();
 	
 	// UI draw
-
-	private const string SettingsPopupId = "PathfindSettingsPopup";
+    
 	private const string FilterPopupId = "ObjectFilterPopup";
 
 	public override void Draw() {
@@ -59,14 +58,14 @@ public class MainWindow : Window, IDisposable {
 		DrawContextControls(config);
 		ImGui.Spacing();
 		DrawSearchFilter(config);
-		DrawObjectTable();
+		DrawObjectTable(config);
 		DrawPopups(config);
 	}
 	
 	// Context controls
 
 	private void DrawContextControls(ConfigFile config) {
-        ImGui.BeginGroup();
+		ImGui.BeginGroup();
 		
 		ImGui.Checkbox(
 			config.Overlay.Enabled ? "Overlay enabled" : "Overlay disabled",
@@ -80,7 +79,7 @@ public class MainWindow : Window, IDisposable {
 		const FontAwesomeIcon SettingsIcon = FontAwesomeIcon.Cog;
 		ImGui.SetCursorPosX(avail - Buttons.CalcIconButtonSize(SettingsIcon).X);
 		if (Buttons.IconButton("##PathfindSettings", SettingsIcon))
-			ImGui.OpenPopup(SettingsPopupId);
+			this._gui.GetWindow<ConfigWindow>().Toggle();
 		
 		ImGui.EndGroup();
 		
@@ -181,18 +180,19 @@ public class MainWindow : Window, IDisposable {
 		ImGui.InputTextWithHint("##ObjectSearchString", "Search paths...", ref config.Filters.SearchString, 255);
 
 		ImGui.SameLine(0, spacing);
-        
+		
 		if (ImGuiComponents.IconButtonWithText(FilterIcon, FilterText))
 			ImGui.OpenPopup(FilterPopupId);
 	}
 
-	private void DrawObjectTable() {
+	private void DrawObjectTable(ConfigFile config) {
 		ImGui.BeginChildFrame(0x0B75, ImGui.GetContentRegionAvail());
 		
-		ImGui.BeginTable("##ObjectSearchTable", 3, ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable);
+		ImGui.BeginTable("##ObjectSearchTable", 4, ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable);
 		
 		var avail = ImGui.GetContentRegionAvail().X;
 		ImGui.TableSetupColumn("Distance", ImGuiTableColumnFlags.DefaultSort, avail * 0.125f);
+		ImGui.TableSetupColumn("Address", config.Table.ShowAddress ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled, avail * 0.25f);
 		ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, avail * 0.175f);
 		ImGui.TableSetupColumn("Paths", ImGuiTableColumnFlags.None, avail * 0.7f);
 		
@@ -205,13 +205,16 @@ public class MainWindow : Window, IDisposable {
 			ImGui.TableNextRow();
 			
 			ImGui.TableSetColumnIndex(0);
-			ImGui.Text($"{info.Distance:0.00}");
-			
+			ImGui.Text(info.Distance.ToString("0.00"));
+
 			ImGui.TableSetColumnIndex(1);
+			ImGui.Text(info.Address.ToString("X"));
+			
+			ImGui.TableSetColumnIndex(2);
 			ImGui.Text(info.GetItemTypeString());
 
-			ImGui.TableSetColumnIndex(2);
-            
+			ImGui.TableSetColumnIndex(3);
+			
 			var count = info.Models.Count;
 			if (count > 1) {
 				ImGui.PushID($"Object_{info.Address:X}");
@@ -219,12 +222,12 @@ public class MainWindow : Window, IDisposable {
 				var imKey = ImGui.GetID("Expand");
 				var state = ImGui.GetStateStorage();
 				var isExpand = state.GetBool(imKey);
-                
+				
 				if (DrawColumnSelect($"{count} Entries (Click to {(isExpand ? "collapse" : "expand")})", isExpand)) {
 					isExpand = !isExpand;
 					state.SetBool(imKey, isExpand);
 				}
-                
+				
 				if (isExpand) DrawModelList(info);
 			} else {
 				var text = info.Models.FirstOrDefault()?.Path ?? string.Empty;
@@ -241,7 +244,7 @@ public class MainWindow : Window, IDisposable {
 		var dim = Helpers.DimColor(ImGuiCol.Text, 0.80f);
 		foreach (var mdl in info.Models) {
 			ImGui.TableNextRow();
-            
+			
 			ImGui.TableSetColumnIndex(1);
 			ImGui.Text(mdl.GetSlotString());
 
@@ -281,12 +284,13 @@ public class MainWindow : Window, IDisposable {
 		list.Sort((a, b) => {
 			return sort.ColumnIndex switch {
 				0 => a.Distance < b.Distance ? sortDir : -sortDir,
-				1 => string.Compare(
+				1 => a.Address < b.Address ? sortDir : -sortDir,
+				2 => string.Compare(
 						a.GetItemTypeString(),
 						b.GetItemTypeString(),
 						StringComparison.Ordinal
 					) * sortDir,
-				2 => string.Compare(
+				3 => string.Compare(
 						string.Join(' ', a.Models.Select(mdl => mdl.Path)),
 						string.Join(' ', b.Models.Select(mdl => mdl.Path)),
 						StringComparison.Ordinal
@@ -301,33 +305,10 @@ public class MainWindow : Window, IDisposable {
 	private void DrawPopups(ConfigFile config) {
 		ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, ImGui.GetStyle().WindowRounding);
 		try {
-			DrawSettings(config);
 			DrawFilters(config);
 		} finally {
 			ImGui.PopStyleVar();
 		}
-	}
-	
-	// Settings
-
-	private void DrawSettings(ConfigFile config) {
-		if (!ImGui.BeginPopup(SettingsPopupId)) return;
-
-		DrawCircleSettings("Outer circle display (Max range)", ref config.Overlay.Max);
-		ImGui.Spacing();
-		DrawCircleSettings("Inner circle display (Min range)", ref config.Overlay.Min);
-		
-		ImGui.EndPopup();
-	}
-
-	private void DrawCircleSettings(string text, ref OverlayElement data) {
-		ImGui.Text(text);
-
-		var col4 = ImGui.ColorConvertU32ToFloat4(data.Color);
-		if (ImGui.ColorEdit4($"Color##{text}", ref col4))
-			data.Color = ImGui.ColorConvertFloat4ToU32(col4);
-		
-		ImGui.SliderFloat($"Width##{text}", ref data.Width, 1.0f, 10.0f);
 	}
 	
 	// Filters
@@ -336,11 +317,11 @@ public class MainWindow : Window, IDisposable {
 		if (!ImGui.BeginPopup(FilterPopupId)) return;
 
 		var filter = config.Filters;
-		var chara = filter.Flags.HasFlag(ObjectFilterFlags.Chara);
+		var showChara = filter.Flags.HasFlag(ObjectFilterFlags.Chara);
 
 		ImGui.BeginTable("ObjectTypeTable", 2, ImGuiTableFlags.NoSavedSettings);
 		ImGui.TableSetupColumn("Object Types");
-		ImGui.TableSetupColumn("Character Models", chara ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled);
+		ImGui.TableSetupColumn("Character Models", showChara ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled);
 		
 		ImGui.PushStyleColor(ImGuiCol.TableHeaderBg, 0);
 		ImGui.TableHeadersRow();
@@ -349,10 +330,10 @@ public class MainWindow : Window, IDisposable {
 
 		ImGui.TableSetColumnIndex(0);
 		DrawFilterFlag(filter, "BgObject", ObjectFilterFlags.BgObject);
-        DrawFilterFlag(filter, "Character", ObjectFilterFlags.Chara);
+		DrawFilterFlag(filter, "Character", ObjectFilterFlags.Chara);
 		DrawFilterFlag(filter, "Terrain", ObjectFilterFlags.Terrain);
 
-		if (chara) {
+		if (showChara) {
 			ImGui.TableSetColumnIndex(1);
 			DrawFilterFlag(filter, "Human", ObjectFilterFlags.Human);
 			DrawFilterFlag(filter, "DemiHuman", ObjectFilterFlags.DemiHuman);

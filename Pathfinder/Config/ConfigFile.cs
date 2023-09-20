@@ -16,4 +16,6 @@ public class ConfigFile : IPluginConfiguration {
 	public ObjectFilters Filters = new();
 
 	public OverlayDisplay Overlay = new();
+
+	public TableDisplay Table = new();
 }
