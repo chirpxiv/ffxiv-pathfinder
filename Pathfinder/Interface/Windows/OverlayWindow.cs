@@ -8,17 +8,18 @@ using Dalamud.Plugin.Services;
 using Dalamud.Interface.Windowing;
 
 using Pathfinder.Config;
-using Pathfinder.Config.Data;
 using Pathfinder.Objects;
 using Pathfinder.Objects.Data;
 using Pathfinder.Services;
 using Pathfinder.Services.Core.Attributes;
+using Pathfinder.Interface.Components;
 
 namespace Pathfinder.Interface.Windows; 
 
 [LocalService]
 public class OverlayWindow : Window, IDisposable {
 	private readonly MainWindow _mainWin;
+	private readonly ImCircle3D _circle3d;
 
 	private readonly ConfigService _config;
 	private readonly ObjectService _objects;
@@ -33,6 +34,7 @@ public class OverlayWindow : Window, IDisposable {
 	
 	public OverlayWindow(
 		MainWindow _mainWin,
+		ImCircle3D _circle3d,
 		ConfigService _config,
 		ObjectService _objects,
 		PerceptionService _wis,
@@ -42,6 +44,7 @@ public class OverlayWindow : Window, IDisposable {
 		WindowFlags
 	) {
 		this._mainWin = _mainWin;
+		this._circle3d = _circle3d;
 
 		this._config = _config;
 		this._objects = _objects;
@@ -57,8 +60,7 @@ public class OverlayWindow : Window, IDisposable {
 	
 	// UI Draw
 
-	public override void PreOpenCheck()
-		=> this.IsOpen = this._mainWin.IsOpen;
+	public override void PreOpenCheck() => this.IsOpen = this._mainWin.IsOpen;
 
 	public override void PreDraw() {
 		Size = ImGui.GetIO().DisplaySize;
@@ -77,40 +79,18 @@ public class OverlayWindow : Window, IDisposable {
 	
 	// Radius circle
 
-	private const int PointCount = 361;
-	private readonly Vector2[] Points = new Vector2[PointCount];
-
 	private void DrawRadiusCircles(ConfigFile config, ImDrawListPtr drawList, Vector3 centerPos) {
 		var minRadius = Math.Min(config.Filters.MinRadius.Value, config.Filters.MaxRadius.Value);
 		var maxRadius = Math.Max(minRadius, config.Filters.MaxRadius.Value);
 		if (config.Filters.MinRadius.Enabled)
-			DrawRadiusCircle(drawList, centerPos, minRadius, config.Overlay.Min);
+			this._circle3d.Draw(drawList, centerPos, minRadius, config.Overlay.Min);
 		if (config.Filters.MaxRadius.Enabled)
-			DrawRadiusCircle(drawList, centerPos, maxRadius, config.Overlay.Max);
-	}
-
-	private void DrawRadiusCircle(ImDrawListPtr drawList, Vector3 centerPos, float radius, OverlayElement data) {
-		if (!data.Draw) return;
-		DrawRadiusCircle(drawList, centerPos, radius, data.Color, data.Width);
-	}
-
-	private void DrawRadiusCircle(ImDrawListPtr drawList, Vector3 centerPos, float radius, uint color = 0xFFFFFFFF, float thickness = 2f) {
-		var start = 0;
-		for (var n = 0; n < PointCount; n++) {
-			var x = radius * (float)Math.Sin((Math.PI * 2.0f) * (n / 360.0f)) + centerPos.X;
-			var z = radius * (float)Math.Cos((Math.PI * 2.0f) * (n / 360.0f)) + centerPos.Z;
-			var vis = this._gui.WorldToScreen(centerPos with { X = x, Z = z }, out this.Points[n]);
-			if (vis && n != PointCount - 1) continue;
-			
-			var ct = n - start + (vis ? 1 : 0);
-			drawList.AddPolyline(ref this.Points[start], ct, color, ImDrawFlags.RoundCornersAll, thickness);
-			start = n;
-		}
+			this._circle3d.Draw(drawList, centerPos, maxRadius, config.Overlay.Max);
 	}
 	
 	// Object path render
 
-	private unsafe void DrawObjectPaths(ConfigFile config, ImDrawListPtr drawList, Vector3 centerPos) {
+	private void DrawObjectPaths(ConfigFile config, ImDrawListPtr drawList, Vector3 centerPos) {
 		var objectInfo = GetClient().GetObjects().ToList();
 		foreach (var info in objectInfo) {
 			if (!this._gui.WorldToScreen(info.Position, out var point)) continue;

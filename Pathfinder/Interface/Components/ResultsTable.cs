@@ -36,23 +36,22 @@ public class ResultsTable {
 	// UI Draw
 	
 	public void Draw(IObjectClient client, ConfigFile config, uint id = 0x0B75) {
-		ImGui.BeginChildFrame(id, ImGui.GetContentRegionAvail());
+		var objects = client.GetObjects().ToList();
 		
-		ImGui.BeginTable("##ObjectSearchTable", 4, ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable);
-
 		var showAddress = config.Table.ShowAddress;
+		
+		ImGui.BeginChildFrame(id, ImGui.GetContentRegionAvail());
+		ImGui.BeginTable("##ObjectSearchTable", 4, ImGuiTableFlags.RowBg | ImGuiTableFlags.Sortable | ImGuiTableFlags.Resizable | ImGuiTableFlags.Reorderable);
 		
 		var avail = ImGui.GetContentRegionAvail().X;
 		ImGui.TableSetupColumn("Distance", ImGuiTableColumnFlags.DefaultSort, avail * 0.125f);
 		ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, avail * 0.175f);
 		ImGui.TableSetupColumn("Address", showAddress ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled, avail * 0.25f);
 		ImGui.TableSetupColumn("Paths", ImGuiTableColumnFlags.None, avail * 0.7f);
-
-		var objects = client.GetObjects().ToList();
+        ImGui.TableHeadersRow();
+		
 		SortTable(ImGui.TableGetSortSpecs().Specs, objects);
 		
-		ImGui.TableHeadersRow();
-
 		foreach (var info in objects) {
 			ImGui.TableNextRow();
 			
