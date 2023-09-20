@@ -35,7 +35,7 @@ public class ObjectInfo {
 			var mdlType = this.ModelType;
 			var result = mdlType.ToString();
 			if (mdlType == ModelType.Human && this.HumanData is { } data)
-				result += $"\n{(data.Gender == 0 ? '♂' : '♀')} {data.Clan}";
+				result += $" ({data.Clan} {(data.Gender == 0 ? '♂' : '♀')})";
 			return result;
 		}
 

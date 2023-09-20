@@ -114,6 +114,8 @@ public class OverlayWindow : Window, IDisposable {
 		if (!this._gui.WorldToScreen(info.Position, out var point))
 			return;
 
+		DrawHover(config, point, dot, info);
+		
 		var color = dot.ColorOverride ? dot.Color : config.GetColor(info.FilterType);
 		var outlineColor = dot.OutlineColor;
 		if (config.Overlay.ItemDot.DimOnHover && this._ctx.Hovered != null && this._ctx.Hovered != info) {
@@ -124,6 +126,24 @@ public class OverlayWindow : Window, IDisposable {
 		drawList.AddCircleFilled(point, dot.Radius + dot.Width - 1.0f, color);
 		if (dot.Width > 0.0f)
 			drawList.AddCircle(point, dot.Radius + dot.Width / 2, outlineColor, 16, dot.Width);
+	}
+
+	private void DrawHover(ConfigFile config, Vector2 point, OverlayDotElement dot, ObjectInfo info) {
+		if (this._ctx.HoveredThisFrame) return;
+		
+		var radius = 6.0f + dot.Radius + dot.Width / 2;
+		var radVec = new Vector2(radius, radius);
+		if (!ImGui.IsMouseHoveringRect(point - radVec, point + radVec))
+			return;
+		
+		this._ctx.SetHovered(info);
+        
+		var color = dot.ColorOverride ? dot.Color : config.GetColor(info.FilterType);
+		ImGui.BeginTooltip();
+		ImGui.PushStyleColor(ImGuiCol.Text, color);
+		ImGui.Text(info.GetItemTypeString());
+		ImGui.PopStyleColor();
+		ImGui.EndTooltip();
 	}
 	
 	// Hover line

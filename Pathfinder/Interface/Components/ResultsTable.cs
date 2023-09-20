@@ -42,8 +42,6 @@ public class ResultsTable {
 	// UI Draw
 
 	public void Draw(IObjectClient client, ConfigFile config, uint id = 0x0B75) {
-		this._ctx.Hovered = null;
-		
 		var avail = ImGui.GetContentRegionAvail();
 		if (ImGui.BeginChildFrame(id, avail)) {
 			DrawTable(client, config);
@@ -60,8 +58,8 @@ public class ResultsTable {
         try {
 			ImGui.TableSetupColumn("Distance", ImGuiTableColumnFlags.DefaultSort, avail.X * 0.125f);
 			ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, avail.X * 0.175f);
-			ImGui.TableSetupColumn("Address", config.Table.ShowAddress ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled, avail.X * 0.25f);
-			ImGui.TableSetupColumn("Paths", ImGuiTableColumnFlags.None, avail.X * 0.7f);
+			ImGui.TableSetupColumn("Address", config.Table.ShowAddress ? ImGuiTableColumnFlags.None : ImGuiTableColumnFlags.Disabled, avail.X * 0.125f);
+			ImGui.TableSetupColumn("Paths", ImGuiTableColumnFlags.WidthStretch, avail.X * 0.7f);
 			ImGui.TableHeadersRow();
 
 			var objects = client.GetObjects().ToList();
@@ -82,6 +80,9 @@ public class ResultsTable {
 			var color = config.GetColor(info.FilterType);
 			ImGui.PushStyleColor(ImGuiCol.Text, color);
 		}
+		
+		var dim = this._ctx is { Hovered: not null, SetterId: not 1 } && this._ctx.Hovered.Address != info.Address;
+		if (dim) Helpers.DimColor(ImGuiCol.Text, 0.65f);
 
 		try {
 			SetColumnIndex(Column.Distance);
@@ -99,6 +100,7 @@ public class ResultsTable {
 			DrawObjectPaths(info, showAddress);
 		} finally {
 			if (useColors) ImGui.PopStyleColor();
+			if (dim) ImGui.PopStyleColor();
 		}
 	}
 
@@ -181,7 +183,7 @@ public class ResultsTable {
 	private void UpdateHover(ObjectInfo info) {
 		var spacing = new Vector2(0, ImGui.GetStyle().ColumnsMinSpacing);
 		if (ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax() + spacing))
-			this._ctx.Hovered = info;
+			this._ctx.SetHovered(info, 1);
 	}
 
 	private void SortTable(ImGuiTableColumnSortSpecsPtr sort, List<ObjectInfo> list) {
