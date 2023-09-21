@@ -1,0 +1,24 @@
+[
+	{
+		"Author": "Chirp",
+		"Name": "Pathfinder",
+		"InternalName": "Pathfinder",
+		"Punchline": "Visualizer for nearby model paths. Adds +5 to perception.",
+		"Description": "A tool for visually locating any model path in the game world.",
+		"AssemblyVersion": "0.1.0",
+		"TestingAssemblyVersion": "0.1.0",
+		"RepoUrl": "https://github.com/chirpxiv/ffxiv-pathfinder",
+		"ApplicableVersion": "any",
+		"DalamudApiLevel": 8,
+		"Tags": [
+			"pathfinder",
+			"resources",
+			"models",
+			"paths",
+			"mdl"
+		],
+		"DownloadLinkInstall": "https://github.com/chirpxiv/ffxiv-pathfinder/releases/download/v0.1.0/latest.zip",
+		"DownloadLinkTesting": "https://github.com/chirpxiv/ffxiv-pathfinder/releases/download/v0.1.0/latest.zip",
+		"DownloadLinkUpdate": "https://github.com/chirpxiv/ffxiv-pathfinder/releases/download/v0.1.0/latest.zip"
+	}
+]
