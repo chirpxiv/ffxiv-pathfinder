@@ -5,6 +5,7 @@
 	"Description": "A tool for visually locating any model path in the game world.",
 	"AssemblyVersion": "0.1.0",
 	"RepoUrl": "https://github.com/chirpxiv/ffxiv-pathfinder",
+	"IconUrl": "https://raw.githubusercontent.com/chirpxiv/ffxiv-pathfinder/main/icon.png",
 	"ApplicableVersion": "any",
 	"DalamudApiLevel": 8,
 	"Tags": [
