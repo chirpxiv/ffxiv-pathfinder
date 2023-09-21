@@ -12,9 +12,7 @@ This is an early testing version with some features still pending implementation
 ## Installation
 
 **Pathfinder will be submitted to Dalamud's main repository.**<br/>
-This repo only exists for testing in the meantime.
-
-By installing, you acknowledge that this repo will be made obsolete, and that you must switch to the official version in future.
+This repo only exists for testing in the meantime. By installing, you acknowledge that this repo will be made obsolete, and that you must switch to the official version in future.
 
 ### Repo URL
 `https://raw.githubusercontent.com/chirpxiv/ffxiv-pathfinder/main/repo.json`
