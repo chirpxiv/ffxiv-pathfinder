@@ -14,7 +14,7 @@ namespace Pathfinder;
 public sealed class Pathfinder : IDalamudPlugin {
 	// Plugin information
 	
-	public string Name => "Object Finder";
+	public string Name => "Pathfinder";
 
 	// Services
 
