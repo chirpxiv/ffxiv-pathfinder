@@ -19,7 +19,7 @@ public class ConfigWindow : Window {
 
 	private readonly ConfigService _cfg;
 
-	public ConfigWindow(ConfigService _cfg) : base("Pathfinder1Settings") {
+	public ConfigWindow(ConfigService _cfg) : base("Pathfinder Settings") {
 		this._cfg = _cfg;
 	}
 	
