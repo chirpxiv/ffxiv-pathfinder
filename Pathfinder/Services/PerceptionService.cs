@@ -35,7 +35,7 @@ public class PerceptionService {
 	}
 
 	private bool IsPlayerActive()
-		=> this._state.IsLoggedIn && !(this._ui.CutsceneActive || this._ui.GposeActive);
+		=> this._state.IsLoggedIn && !(this._ui.CutsceneActive || this._state.IsGPosing);
 
 	private Vector3? GetPlayerPosition()
 		=> IsPlayerActive() ? this._state.LocalPlayer?.Position : null;

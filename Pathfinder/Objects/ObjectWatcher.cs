@@ -2,13 +2,12 @@
 using System.Linq;
 using System.Collections.Generic;
 
-using Dalamud.Game;
+using Dalamud.Plugin.Services;
 
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
 using Pathfinder.Events;
 using Pathfinder.Objects.Data;
-using Pathfinder.Interop.Structs;
 using Pathfinder.Services.Core.Attributes;
 
 namespace Pathfinder.Objects;
@@ -17,9 +16,9 @@ public delegate void ObjectsUpdatedHandler(ObjectWatcher sender, IEnumerable<Obj
 
 [GlobalService]
 public class ObjectWatcher : IDisposable {
-	private readonly Framework _framework;
+	private readonly IFramework _framework;
 	
-	public ObjectWatcher(Framework _framework, InitEvent _init) {
+	public ObjectWatcher(IFramework _framework, InitEvent _init) {
 		this._framework = _framework;
 		_init.Subscribe(OnInit);
 	}

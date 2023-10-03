@@ -1,6 +1,4 @@
 ﻿using Dalamud.IoC;
-using Dalamud.Game;
-using Dalamud.Game.Gui;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
@@ -11,8 +9,8 @@ namespace Pathfinder.Services;
 internal sealed class DalamudServices {
 	private readonly DalamudPluginInterface _api;
 	[PluginService] private ICommandManager _cmd { get; set; } = null!;
-	[PluginService] private Framework _framework { get; set; } = null!;
-	[PluginService] private ChatGui _chat { get; set; } = null!;
+	[PluginService] private IFramework _framework { get; set; } = null!;
+	[PluginService] private IChatGui _chat { get; set; } = null!;
 	[PluginService] private IGameGui _gui { get; set; } = null!;
 	[PluginService] private IClientState _state { get; set; } = null!;
 

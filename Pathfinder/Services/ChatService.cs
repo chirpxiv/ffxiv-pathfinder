@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.Gui;
+﻿using Dalamud.Plugin.Services;
 using Dalamud.Game.Text.SeStringHandling;
 
 using Pathfinder.Services.Core.Attributes;
@@ -7,9 +7,9 @@ namespace Pathfinder.Services;
 
 [GlobalService]
 public class ChatService {
-	private readonly ChatGui _chat;
+	private readonly IChatGui _chat;
 	
-	public ChatService(ChatGui _chat) {
+	public ChatService(IChatGui _chat) {
 		this._chat = _chat;
 	}
 
