@@ -7,7 +7,6 @@
 	"RepoUrl": "https://github.com/chirpxiv/ffxiv-pathfinder",
 	"IconUrl": "https://raw.githubusercontent.com/chirpxiv/ffxiv-pathfinder/main/icon.png",
 	"ApplicableVersion": "any",
-	"DalamudApiLevel": 9,
 	"Tags": [
 		"pathfinder",
 		"resources",
