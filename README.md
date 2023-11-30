@@ -13,8 +13,5 @@ This is an early testing version with some features still pending implementation
 
 Pathfinder can be installed from Dalamud's [testing repository](https://goatcorp.github.io/faq/dalamud_troubleshooting.html#q-how-do-i-enable-plugin-test-builds).
 
-### Repo URL
-`https://raw.githubusercontent.com/chirpxiv/ffxiv-pathfinder/main/repo.json`
-
 ### Acknowledgements
 - Icon made by [Kaj](https://twitter.com/kajupeEm) - thank you!
