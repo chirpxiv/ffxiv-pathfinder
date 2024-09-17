@@ -44,7 +44,7 @@ public class WorldObject {
 	}
 
 	public IEnumerable<WorldObject> GetChildren() {
-		var child = GetFirstChild();
+		var child = this.GetFirstChild();
 		if (child == null) yield break;
 		yield return child;
 		
@@ -59,7 +59,7 @@ public class WorldObject {
 	}
 
 	public IEnumerable<WorldObject> GetSiblings() {
-		var sibling = NextSibling();
+		var sibling = this.NextSibling();
 		
 		while (sibling != null && sibling.Pointer.Address != this.Pointer.Address) {
 			yield return sibling;

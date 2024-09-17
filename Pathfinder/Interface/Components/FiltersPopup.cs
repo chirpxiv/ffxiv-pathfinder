@@ -24,16 +24,16 @@ public class FiltersPopup {
 		ImGui.TableNextRow();
 
 		ImGui.TableSetColumnIndex(0);
-		DrawFilterFlag(config, WorldObjectType.Terrain);
-		DrawFilterFlag(config, WorldObjectType.BgObject);
-		DrawFilterFlag(config, WorldObjectType.Chara, "Characters");
+		this.DrawFilterFlag(config, WorldObjectType.Terrain);
+		this.DrawFilterFlag(config, WorldObjectType.BgObject);
+		this.DrawFilterFlag(config, WorldObjectType.Chara, "Characters");
 
 		if (showChara) {
 			ImGui.TableSetColumnIndex(1);
-			DrawFilterFlag(config, WorldObjectType.Human);
-			DrawFilterFlag(config, WorldObjectType.DemiHuman);
-			DrawFilterFlag(config, WorldObjectType.Monster);
-			DrawFilterFlag(config, WorldObjectType.Weapon);
+			this.DrawFilterFlag(config, WorldObjectType.Human);
+			this.DrawFilterFlag(config, WorldObjectType.DemiHuman);
+			this.DrawFilterFlag(config, WorldObjectType.Monster);
+			this.DrawFilterFlag(config, WorldObjectType.Weapon);
 		}
 
 		ImGui.EndTable();

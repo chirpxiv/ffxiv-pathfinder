@@ -29,10 +29,9 @@ public class ResultsTable {
     
 	private readonly PerceptionService _wis;
 	
-	public ResultsTable(ObjectUiCtx _ctx, PerceptionService _wis) {
-		this._ctx = _ctx;
-        
-		this._wis = _wis;
+	public ResultsTable(ObjectUiCtx ctx, PerceptionService wis) {
+		this._ctx = ctx;
+		this._wis = wis;
 	}
 	
 	// Column wrappers
@@ -44,7 +43,7 @@ public class ResultsTable {
 	public void Draw(IObjectClient client, ConfigFile config, uint id = 0x0B75) {
 		var avail = ImGui.GetContentRegionAvail();
 		if (ImGui.BeginChildFrame(id, avail)) {
-			DrawTable(client, config);
+			this.DrawTable(client, config);
 			ImGui.EndChildFrame();
 		}
 	}
@@ -63,7 +62,7 @@ public class ResultsTable {
 			ImGui.TableHeadersRow();
 
 			var objects = client.GetObjects().ToList();
-			SortTable(ImGui.TableGetSortSpecs().Specs, objects);
+			this.SortTable(ImGui.TableGetSortSpecs().Specs, objects);
 			objects.ForEach(item => DrawObjectEntry(config, item));
 		} finally {
 			ImGui.EndTable();
@@ -87,19 +86,19 @@ public class ResultsTable {
 		if (dim) dim = Helpers.DimColor(ImGuiCol.Text, 0.65f);
 
 		try {
-			SetColumnIndex(Column.Distance);
+			this.SetColumnIndex(Column.Distance);
 			ImGui.Text(info.Distance.ToString("0.00"));
 
-			SetColumnIndex(Column.Type);
+			this.SetColumnIndex(Column.Type);
 			ImGui.Text(info.GetItemTypeString());
 
 			if (showAddress) {
-				SetColumnIndex(Column.Address);
-				DrawAddress(info.Address);
+				this.SetColumnIndex(Column.Address);
+				this.DrawAddress(info.Address);
 			}
 
-			SetColumnIndex(Column.Paths);
-			DrawObjectPaths(info, showAddress);
+			this.SetColumnIndex(Column.Paths);
+			this.DrawObjectPaths(info, showAddress);
 		} finally {
 			if (useColors) ImGui.PopStyleColor();
 			if (dim) ImGui.PopStyleColor();
@@ -115,18 +114,18 @@ public class ResultsTable {
 			var state = ImGui.GetStateStorage();
 			var isExpand = state.GetBool(imKey);
 				
-			if (DrawColumnSelect($"{count} entries (Click to {(isExpand ? "collapse" : "expand")})", isExpand)) {
+			if (this.DrawColumnSelect($"{count} entries (Click to {(isExpand ? "collapse" : "expand")})", isExpand)) {
 				isExpand = !isExpand;
 				state.SetBool(imKey, isExpand);
 			}
 			
-			UpdateHover(info);
+			this.UpdateHover(info);
 				
 			if (isExpand) DrawModelList(info, showAddress);
 		} else {
 			var text = info.Models.FirstOrDefault()?.Path ?? string.Empty;
-			DrawPath(text);
-			UpdateHover(info);
+			this.DrawPath(text);
+			this.UpdateHover(info);
 		}
 	}
 
@@ -135,31 +134,31 @@ public class ResultsTable {
 		foreach (var mdl in info.Models) {
 			ImGui.TableNextRow();
 			
-			SetColumnIndex(Column.Type);
+			this.SetColumnIndex(Column.Type);
 			ImGui.Text(mdl.GetSlotString());
 
 			if (showAddress) {
-				SetColumnIndex(Column.Address);
-				DrawAddress(mdl.Address);
+				this.SetColumnIndex(Column.Address);
+				this.DrawAddress(mdl.Address);
 			}
 
-			SetColumnIndex(Column.Paths);
+			this.SetColumnIndex(Column.Paths);
 			var indent = ImGui.GetColumnWidth() * 0.065f;
 			ImGui.Indent(indent);
-			DrawPath(mdl.Path);
-			UpdateHover(info);
+			this.DrawPath(mdl.Path);
+			this.UpdateHover(info);
 			ImGui.Unindent(indent);
 		}
 		if (dim) ImGui.PopStyleColor(1);
 	}
 
 	private void DrawAddress(nint addr) {
-		if (DrawColumnSelect(addr.ToString("X")))
+		if (this.DrawColumnSelect(addr.ToString("X")))
 			this._wis.SetClipboardAddress(addr);
 	}
 
 	private void DrawPath(string path) {
-		if (DrawColumnSelect(path))
+		if (this.DrawColumnSelect(path))
 			this._wis.SetClipboardPath(path);
 	}
 	

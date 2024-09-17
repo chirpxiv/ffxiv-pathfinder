@@ -1,7 +1,7 @@
 ﻿using System;
 
 using Dalamud.Plugin;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,13 +18,19 @@ public sealed class Pathfinder : IDalamudPlugin {
 
 	// Services
 
+	private readonly IPluginLog _log;
 	private readonly ServiceProvider _services;
 	
 	// Ctor & Initialization
 	
-	public Pathfinder(DalamudPluginInterface api) {
+	public Pathfinder(
+		IDalamudPluginInterface api,
+		IPluginLog log
+	) {
+		this._log = log;
+		
 		try {
-			using var factory = new ServiceFactory();
+			using var factory = new ServiceFactory(log);
 			
 			this._services = factory
 				.AddDalamud(api)
@@ -35,11 +41,11 @@ public sealed class Pathfinder : IDalamudPlugin {
 
 			this._services.GetRequiredService<ConfigService>().Load();
 
-			using var _initEvent = this._services.GetRequiredService<InitEvent>();
-			_initEvent.Invoke();
+			using var initEvent = this._services.GetRequiredService<InitEvent>();
+			initEvent.Invoke();
 
 		} catch {
-			Dispose();
+			this.Dispose();
 			throw;
 		}
 	}
@@ -48,7 +54,7 @@ public sealed class Pathfinder : IDalamudPlugin {
 		try {
 			this._services.Dispose();
 		} catch (Exception err) {
-			PluginLog.Error($"Failed to dispose:\n{err}");
+			this._log.Error($"Failed to dispose:\n{err}");
 		}
 	}
 }

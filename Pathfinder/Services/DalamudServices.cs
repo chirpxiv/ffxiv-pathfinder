@@ -7,14 +7,14 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Pathfinder.Services; 
 
 internal sealed class DalamudServices {
-	private readonly DalamudPluginInterface _api;
+	private readonly IDalamudPluginInterface _api;
 	[PluginService] private ICommandManager _cmd { get; set; } = null!;
 	[PluginService] private IFramework _framework { get; set; } = null!;
 	[PluginService] private IChatGui _chat { get; set; } = null!;
 	[PluginService] private IGameGui _gui { get; set; } = null!;
 	[PluginService] private IClientState _state { get; set; } = null!;
 
-	internal DalamudServices(DalamudPluginInterface api) {
+	internal DalamudServices(IDalamudPluginInterface api) {
 		this._api = api;
 		api.Inject(this);
 	}

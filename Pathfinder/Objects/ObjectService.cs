@@ -18,13 +18,13 @@ public class ObjectService : IDisposable {
 	private readonly ConfigService _config;
 	private readonly PerceptionService _wis;
 	
-	public ObjectService(ObjectWatcher _watcher, ConfigService _config, PerceptionService _wis, InitEvent _init) {
-		this._watcher = _watcher;
+	public ObjectService(ObjectWatcher watcher, ConfigService config, PerceptionService wis, InitEvent init) {
+		this._watcher = watcher;
 
-		this._config = _config;
-		this._wis = _wis;
+		this._config = config;
+		this._wis = wis;
 		
-		_init.Subscribe(OnInit);
+		init.Subscribe(this.OnInit);
 	}
 
 	private void OnInit() {
@@ -102,6 +102,6 @@ public class ObjectService : IDisposable {
 	// Disposal
 
 	public void Dispose() {
-		this._watcher.OnObjectsUpdated -= OnObjectsUpdated;
+		this._watcher.OnObjectsUpdated -= this.OnObjectsUpdated;
 	}
 }

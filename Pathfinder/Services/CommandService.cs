@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Dalamud.Plugin.Services;
 using Dalamud.Game.Command;
-using HandlerDelegate = Dalamud.Game.Command.CommandInfo.HandlerDelegate;
+using HandlerDelegate = Dalamud.Game.Command.IReadOnlyCommandInfo.HandlerDelegate;
 
 using Pathfinder.Events;
 using Pathfinder.Interface;
@@ -17,10 +17,14 @@ public class CommandService : IDisposable {
 	private readonly ICommandManager _cmd;
 	private readonly PluginGui _gui;
 	
-	public CommandService(ICommandManager _cmd, PluginGui _gui, InitEvent _init) {
-		this._cmd = _cmd;
-		this._gui = _gui;
-		_init.Subscribe(OnInit);
+	public CommandService(
+		ICommandManager cmd,
+		PluginGui gui,
+		InitEvent init
+	) {
+		this._cmd = cmd;
+		this._gui = gui;
+		init.Subscribe(this.OnInit);
 	}
 	
 	// Initialization
@@ -28,7 +32,7 @@ public class CommandService : IDisposable {
 	private readonly HashSet<string> Commands = new();
 
 	private void OnInit() {
-		BuildCommand("/pathfinder", OnCommand)
+		this.BuildCommand("/pathfinder", OnCommand)
 			.SetMessage("Toggles the main Pathfinder window.")
 			.AddAliases("/pathfind", "/findpath", "/findpaths")
 			.Create();
@@ -44,7 +48,7 @@ public class CommandService : IDisposable {
 
 	// Command handlers
 
-	private void OnCommand(string _command, string arguments)
+	private void OnCommand(string _, string arguments)
 		=> this._gui.GetWindow<MainWindow>().Toggle();
 	
 	// Disposal
@@ -67,9 +71,8 @@ public class CommandService : IDisposable {
 		private bool ShowInHelp;
 		private string HelpMessage = string.Empty;
 		
-		public CommandFactory(CommandService _cmd, string name, HandlerDelegate handler) {
-			this._cmd = _cmd;
-			
+		public CommandFactory(CommandService cmd, string name, HandlerDelegate handler) {
+			this._cmd = cmd;
 			this.Name = name;
 			this.Handler = handler;
 		}
@@ -93,8 +96,8 @@ public class CommandService : IDisposable {
 		}
 
 		public void Create() {
-			this._cmd.Add(this.Name, BuildCommandInfo());
-			this.Alias.ForEach(CreateAlias);
+			this._cmd.Add(this.Name, this.BuildCommandInfo());
+			this.Alias.ForEach(this.CreateAlias);
 		}
 
 		private void CreateAlias(string alias) {

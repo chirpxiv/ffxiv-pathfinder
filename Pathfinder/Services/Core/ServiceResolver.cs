@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,11 +15,16 @@ public class ServiceResolver {
 	// Constructor
 
 	private readonly Type BaseType = typeof(ServiceAttribute);
-	
+
+	private readonly IPluginLog _log;
 	private readonly IServiceCollection _services;
 
-	public ServiceResolver(IServiceCollection _services) {
-		this._services = _services;
+	public ServiceResolver(
+		IPluginLog log,
+		IServiceCollection services
+	) {
+		this._log = log;
+		this._services = services;
 	}
 	
 	// Resolver state
@@ -36,7 +41,7 @@ public class ServiceResolver {
 				.Where(TypeHasBaseAttribute);
 			this.Types.AddRange(types);
 		} catch (Exception err) {
-			PluginLog.Error($"Failed to resolve services for '{this.BaseType.Name}':\n{err}");
+			this._log.Error($"Failed to resolve services for '{this.BaseType.Name}':\n{err}");
 			throw;
 		} finally {
 			this.HasResolvedTypes = true;
@@ -46,18 +51,18 @@ public class ServiceResolver {
 	// Factory methods
 	
 	private IEnumerable<Type> GetByAttribute<A>() where A : ServiceAttribute {
-		GetTypes();
+		this.GetTypes();
 		return this.Types.Where(TypeHasAttribute<A>);
 	}
 
 	public ServiceResolver AddSingletons<A>() where A: ServiceAttribute {
-		foreach (var type in GetByAttribute<A>())
+		foreach (var type in this.GetByAttribute<A>())
 			this._services.AddSingleton(type);
 		return this;
 	}
 
 	public ServiceResolver AddLocal<A>() where A : LocalServiceAttribute {
-		foreach (var type in GetByAttribute<A>()) {
+		foreach (var type in this.GetByAttribute<A>()) {
 			var attr = type.GetCustomAttribute<A>()!;
 			if (attr.HasFlag(ServiceFlags.Transient))
 				this._services.AddTransient(type);
@@ -76,7 +81,7 @@ public class ServiceResolver {
 	
 	// Attribute helpers
 
-	private bool TypeHasBaseAttribute(Type type) => type.CustomAttributes.Any(IsBaseAttribute);
+	private bool TypeHasBaseAttribute(Type type) => type.CustomAttributes.Any(this.IsBaseAttribute);
 	private bool IsBaseAttribute(CustomAttributeData data) => data.AttributeType.BaseType == this.BaseType;
 
 	private static bool TypeHasAttribute<B>(Type type) => type.CustomAttributes.Any(IsAttribute<B>);

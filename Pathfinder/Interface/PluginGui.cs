@@ -14,16 +14,16 @@ namespace Pathfinder.Interface;
 
 [GlobalService]
 public class PluginGui : IDisposable {
-	private readonly UiBuilder _ui;
+	private readonly IUiBuilder _ui;
 
 	private readonly IServiceScope _scope;
 	private readonly WindowSystem _windows = new("Pathfinder");
 		
-	public PluginGui(IServiceProvider _services, UiBuilder _ui, InitEvent _init) {
-		this._ui = _ui;
+	public PluginGui(IServiceProvider services, IUiBuilder ui, InitEvent init) {
+		this._ui = ui;
 		
-		this._scope = _services.CreateScope();
-		_init.Subscribe(OnInit);
+		this._scope = services.CreateScope();
+		init.Subscribe(this.OnInit);
 	}
 	
 	// Initialization
@@ -31,11 +31,11 @@ public class PluginGui : IDisposable {
 	private Action Draw => this._windows.Draw;
 
 	private void OnInit() {
-		AddWindow<MainWindow>();
-		AddWindow<OverlayWindow>();
+		this.AddWindow<MainWindow>();
+		this.AddWindow<OverlayWindow>();
 		this._ui.Draw += this.Draw;
-		this._ui.OpenMainUi += OpenMainUi;
-		this._ui.OpenConfigUi += OpenConfigUi;
+		this._ui.OpenMainUi += this.OpenMainUi;
+		this._ui.OpenConfigUi += this.OpenConfigUi;
 		this._ui.DisableGposeUiHide = true;
 		this._ui.DisableCutsceneUiHide = true;
 	}
@@ -51,7 +51,7 @@ public class PluginGui : IDisposable {
 	public T GetWindow<T>() where T : Window {
 		if (this._windows.Windows.FirstOrDefault(w => w is T) is T window)
 			return window;
-		return AddWindow<T>();
+		return this.AddWindow<T>();
 	}
 	
 	// Events
@@ -64,8 +64,8 @@ public class PluginGui : IDisposable {
 
 	public void Dispose() {
 		this._ui.Draw -= this.Draw;
-		this._ui.OpenMainUi -= OpenMainUi;
-		this._ui.OpenConfigUi -= OpenConfigUi;
+		this._ui.OpenMainUi -= this.OpenMainUi;
+		this._ui.OpenConfigUi -= this.OpenConfigUi;
 		this._scope.Dispose();
 	}
 }

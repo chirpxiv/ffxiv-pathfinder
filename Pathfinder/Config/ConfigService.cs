@@ -1,7 +1,7 @@
 ﻿using System;
 
-using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 
 using Pathfinder.Services.Core.Attributes;
 
@@ -9,12 +9,17 @@ namespace Pathfinder.Config;
 
 [GlobalService]
 public class ConfigService : IDisposable {
-	private readonly DalamudPluginInterface _api;
+	private readonly IDalamudPluginInterface _api;
+	private readonly IPluginLog _log;
 
 	private ConfigFile _config = null!;
 	
-	public ConfigService(DalamudPluginInterface _api) {
-		this._api = _api;
+	public ConfigService(
+		IDalamudPluginInterface api,
+		IPluginLog log
+	) {
+		this._api = api;
+		this._log = log;
 	}
 
 	public ConfigFile Load() {
@@ -37,7 +42,7 @@ public class ConfigService : IDisposable {
 			var cfg = this.Get();
 			this._api.SavePluginConfig(cfg);
 		} catch (Exception err) {
-			PluginLog.Error($"Failed to save configuration:\n{err}");
+			this._log.Error($"Failed to save configuration:\n{err}");
 		}
 	}
 	
@@ -47,7 +52,7 @@ public class ConfigService : IDisposable {
 
 	public void Dispose() {
 		if (this.IsDisposed) return;
-		Save();
+		this.Save();
 		this.IsDisposed = true;
 	}
 }

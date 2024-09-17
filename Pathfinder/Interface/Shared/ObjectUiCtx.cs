@@ -7,10 +7,10 @@ namespace Pathfinder.Interface.Shared;
 
 [LocalService]
 public class ObjectUiCtx {
-	private readonly UiBuilder _ui;
+	private readonly IUiBuilder _ui;
 	
-	public ObjectUiCtx(UiBuilder _ui) {
-		this._ui = _ui;
+	public ObjectUiCtx(IUiBuilder ui) {
+		this._ui = ui;
 	}
 	
 	// Hover ctx
@@ -18,12 +18,12 @@ public class ObjectUiCtx {
 	public int SetterId;
 	private ulong LastUpdateFrame;
 	
-	private ObjectInfo? __hover;
+	private ObjectInfo? _hover;
 	public ObjectInfo? Hovered {
-		get => this.__hover != null && this.LastUpdateFrame >= this._ui.FrameCount - 1 ? this.__hover : null;
+		get => this._hover != null && this.LastUpdateFrame >= this._ui.FrameCount - 1 ? this._hover : null;
 		private set {
 			this.LastUpdateFrame = this._ui.FrameCount;
-			this.__hover = value;
+			this._hover = value;
 		}
 	}
 

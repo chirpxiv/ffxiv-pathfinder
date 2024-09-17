@@ -9,8 +9,8 @@ namespace Pathfinder.Services;
 public class ChatService {
 	private readonly IChatGui _chat;
 	
-	public ChatService(IChatGui _chat) {
-		this._chat = _chat;
+	public ChatService(IChatGui chat) {
+		this._chat = chat;
 	}
 
 	public void PrintMessage(string text) {

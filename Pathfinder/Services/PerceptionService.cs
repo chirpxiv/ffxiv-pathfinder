@@ -16,29 +16,26 @@ namespace Pathfinder.Services;
 public class PerceptionService {
 	private readonly IClientState _state;
 	private readonly ChatService _chat;
-	private readonly UiBuilder _ui;
+	private readonly IUiBuilder _ui;
 	
-	public PerceptionService(IClientState _state, ChatService _chat, UiBuilder _ui) {
-		this._state = _state;
-		this._chat = _chat;
-		this._ui = _ui;
+	public PerceptionService(IClientState state, ChatService chat, IUiBuilder ui) {
+		this._state = state;
+		this._chat = chat;
+		this._ui = ui;
 	}
 	
 	// Retrieve position based on either player or otherwise camera.
 
-	public Vector3 GetPosition()
-		=> GetPlayerPosition() ?? GetCameraPosition() ?? Vector3.Zero;
+	public Vector3 GetPosition() => this.GetPlayerPosition() ?? this.GetCameraPosition() ?? Vector3.Zero;
 
 	public Vector2 GetPosition2D() {
-		var pos = GetPosition();
+		var pos = this.GetPosition();
 		return new Vector2(pos.X, pos.Z);
 	}
 
-	private bool IsPlayerActive()
-		=> this._state.IsLoggedIn && !(this._ui.CutsceneActive || this._state.IsGPosing);
+	private bool IsPlayerActive() => this._state.IsLoggedIn && !(this._ui.CutsceneActive || this._state.IsGPosing);
 
-	private Vector3? GetPlayerPosition()
-		=> IsPlayerActive() ? this._state.LocalPlayer?.Position : null;
+	private Vector3? GetPlayerPosition() => this.IsPlayerActive() ? this._state.LocalPlayer?.Position : null;
 
 	private unsafe Vector3? GetCameraPosition() {
 		var manager = CameraManager.Instance();
@@ -48,11 +45,9 @@ public class PerceptionService {
 	
 	// Copy data to clipboard
 
-	public void SetClipboardAddress(nint address)
-		=> SetClipboard("Address copied to clipboard:", address.ToString("X"));
+	public void SetClipboardAddress(nint address) => this.SetClipboard("Address copied to clipboard:", address.ToString("X"));
 
-	public void SetClipboardPath(string path)
-		=> SetClipboard("Model path copied to clipboard:", path, "\n");
+	public void SetClipboardPath(string path) => this.SetClipboard("Model path copied to clipboard:", path, "\n");
 
 	private void SetClipboard(string? msg, string content, string delim = " ") {
 		ImGui.SetClipboardText(content);
@@ -63,7 +58,7 @@ public class PerceptionService {
 	public void SetClipboardPaths(List<string> paths) {
 		switch (paths.Count) {
 			case 1:
-				SetClipboardPath(paths.First());
+				this.SetClipboardPath(paths.First());
 				return;
 			case > 0:
 				var content = string.Join("\n", paths);

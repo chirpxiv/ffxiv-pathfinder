@@ -14,7 +14,7 @@ public class RangeControls {
 	public void Draw(ConfigFile config) {
 		var uiEnabled = config.Overlay.Enabled;
 		
-		DrawRadiusControl(
+		this.DrawRadiusControl(
 			"##MaxRadius",
 			ref config.Filters.MaxRadius,
 			ref config.Overlay.Max.Draw,
@@ -25,7 +25,7 @@ public class RangeControls {
 			uiEnabled
 		);
 		
-		DrawRadiusControl(
+		this.DrawRadiusControl(
 			"##MinRadius",
 			ref config.Filters.MinRadius,
 			ref config.Overlay.Min.Draw,

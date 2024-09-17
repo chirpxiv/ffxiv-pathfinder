@@ -18,9 +18,9 @@ public delegate void ObjectsUpdatedHandler(ObjectWatcher sender, IEnumerable<Obj
 public class ObjectWatcher : IDisposable {
 	private readonly IFramework _framework;
 	
-	public ObjectWatcher(IFramework _framework, InitEvent _init) {
-		this._framework = _framework;
-		_init.Subscribe(OnInit);
+	public ObjectWatcher(IFramework framework, InitEvent init) {
+		this._framework = framework;
+		init.Subscribe(this.OnInit);
 	}
 
 	private void OnInit() {
@@ -45,7 +45,7 @@ public class ObjectWatcher : IDisposable {
 	private void OnUpdate(object _sender) {
 		if (!this.IsEnabled) return;
 
-		var objects = RecurseWorld()
+		var objects = this.RecurseWorld()
 			.Where(obj => obj.ObjectType is ObjectType.BgObject or ObjectType.Terrain or ObjectType.CharacterBase)
 			.Select(obj => obj.GetObjectInfo());
 		
@@ -58,25 +58,25 @@ public class ObjectWatcher : IDisposable {
 	}
 
 	private IEnumerable<WorldObject> RecurseWorld() {
-		var worldObj = GetWorld();
+		var worldObj = this.GetWorld();
 		if (worldObj == null) yield break;
 
 		yield return worldObj;
 		
 		foreach (var sibling in worldObj.GetSiblings()) {
 			yield return sibling;
-			foreach (var child in RecurseChildren(sibling))
+			foreach (var child in this.RecurseChildren(sibling))
 				yield return child;
 		}
 
-		foreach (var child in RecurseChildren(worldObj))
+		foreach (var child in this.RecurseChildren(worldObj))
 			yield return child;
 	}
 
 	private IEnumerable<WorldObject> RecurseChildren(WorldObject worldObj) {
 		foreach (var child in worldObj.GetChildren()) {
 			yield return child;
-			foreach (var reChild in RecurseChildren(child))
+			foreach (var reChild in this.RecurseChildren(child))
 				yield return reChild;
 		}
 	}
@@ -107,7 +107,7 @@ public class ObjectWatcher : IDisposable {
 		this.IsDisposed = true;
 		this.IsEnabled = false;
 		
-		this._framework.Update -= OnUpdate;
+		this._framework.Update -= this.OnUpdate;
 		this.OnObjectsUpdated = null;
 		
 		this._clients.Clear();

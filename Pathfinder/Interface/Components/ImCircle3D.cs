@@ -21,15 +21,15 @@ public class ImCircle3D {
 
 	private readonly IGameGui _gui;
 
-	public ImCircle3D(IGameGui _gui) {
-		this._gui = _gui;
+	public ImCircle3D(IGameGui gui) {
+		this._gui = gui;
 	}
 	
 	// Draw
 
 	public void Draw(ImDrawListPtr drawList, Vector3 centerPos, float radius, OverlayElement data) {
 		if (!data.Draw) return;
-		Draw(drawList, centerPos, radius, data.Color, data.Width);
+		this.Draw(drawList, centerPos, radius, data.Color, data.Width);
 	}
 
 	public void Draw(ImDrawListPtr drawList, Vector3 centerPos, float radius, uint color = 0xFFFFFFFF, float thickness = 2f) {

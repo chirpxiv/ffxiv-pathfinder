@@ -55,15 +55,15 @@ public class ObjectInfo {
 
 		switch (this.Type) {
 			case ObjectType.BgObject:
-				ReadBgObject(ptr.Cast<BgObject>());
+				this.ReadBgObject(ptr.Cast<BgObject>());
 				this.FilterType = WorldObjectType.BgObject;
 				break;
 			case ObjectType.Terrain:
-				ReadTerrain(ptr.Cast<Terrain>());
+				this.ReadTerrain(ptr.Cast<Terrain>());
 				this.FilterType = WorldObjectType.Terrain;
 				break;
 			case ObjectType.CharacterBase:
-				ReadCharaBase(ptr.Cast<CharacterBase>());
+				this.ReadCharaBase(ptr.Cast<CharacterBase>());
 				this.FilterFlags = WorldObjectType.Chara;
 				this.FilterType = this.ModelType switch {
 					ModelType.Human => WorldObjectType.Human,
@@ -90,7 +90,7 @@ public class ObjectInfo {
 	private unsafe void ReadBgObject(Pointer<BgObject> ptr) {
 		var resource = ptr.Data->ResourceHandle;
 		if (resource != null)
-			AddModel(resource->FileName.ToString());
+			this.AddModel(resource->FileName.ToString());
 	}
 	
 	// Terrain handler
@@ -98,7 +98,7 @@ public class ObjectInfo {
 	private unsafe void ReadTerrain(Pointer<Terrain> ptr) {
 		var resource = ptr.Data->ResourceHandle;
 		if (resource != null)
-			AddModel(resource->FileName.ToString());
+			this.AddModel(resource->FileName.ToString());
 	}
 	
 	// CharacterBase handler
@@ -117,14 +117,14 @@ public class ObjectInfo {
 			if (model == null || model->ModelResourceHandle == null) continue;
 			
 			var path =  model->ModelResourceHandle->ResourceHandle.FileName.ToString();
-			AddModel(path, i, isHuman, (nint)model);
+			this.AddModel(path, i, isHuman, (nint)model);
 		}
 	}
 
 	private unsafe void ReadHuman(Pointer<Human> ptr) {
 		var custom = ptr.Data->Customize;
 		this.HumanData = new HumanData {
-			Clan = (Clan)custom.Clan,
+			Clan = (Clan)custom.Tribe,
 			Gender = custom.Sex
 		};
 	}
