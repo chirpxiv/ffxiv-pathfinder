@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Authors>Chirp</Authors>
-		<Version>0.1.1</Version>
+		<Version>0.1.2</Version>
 		<Product>FFXIV Pathfinder</Product>
 		<PackageProjectUrl>https://github.com/chirpxiv/ffxiv-pathfinder</PackageProjectUrl>
 	</PropertyGroup>
