@@ -14,6 +14,7 @@ public enum ModelSlot {
 	Hair,
 	Face,
 	TailEars,
+	Glasses = 15,
 	
 	Max = TailEars,
 	Unknown = -1
@@ -32,8 +33,10 @@ public class ModelData {
 			ModelSlot.RingRight => "Ring (Right)",
 			ModelSlot.RingLeft => "Ring (Left)",
 			ModelSlot.TailEars => "Tail/Ears",
+			ModelSlot.Glasses => "Glasses",
 			var slot => slot.ToString()
 		},
+		_ when this.Slot is (int)ModelSlot.Glasses => "Glasses",
 		_ => $"Slot {this.Slot + 1}"
 	};
 }
