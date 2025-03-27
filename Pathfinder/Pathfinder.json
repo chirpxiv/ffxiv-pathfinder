@@ -3,7 +3,7 @@
 	"Name": "Pathfinder",
 	"Punchline": "Visualizer for nearby model paths. Adds +5 to perception.",
 	"Description": "A tool for visually locating any model path in the game world.",
-	"AssemblyVersion": "0.1.2",
+	"AssemblyVersion": "0.1.3",
 	"RepoUrl": "https://github.com/chirpxiv/ffxiv-pathfinder",
 	"IconUrl": "https://raw.githubusercontent.com/chirpxiv/ffxiv-pathfinder/main/icon.png",
 	"ApplicableVersion": "any",
